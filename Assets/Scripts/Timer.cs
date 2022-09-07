@@ -4,8 +4,8 @@ using UnityEngine;
 public class Timer : MonoBehaviour
 {
 
-    private Action _timerCallBack = null;
-    private float _timeLeft = 0;
+    private Action _timerCallBack;
+    private float _timeLeft;
 
     private void Update() {
         Countdown();
