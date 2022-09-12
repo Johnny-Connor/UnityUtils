@@ -22,6 +22,10 @@ public class Timer : MonoBehaviour
 
     }
 
+    public float GetTimeLeft(){
+        return _timeLeft;
+    }
+
     /* 
     Sets a new value for the timer and receives a callback method to use when the timer
     reaches 0 in the Countdown() method.
