@@ -26,10 +26,8 @@ public class Timer : MonoBehaviour
         return _timeLeft;
     }
 
-    /* 
-    Sets a new value for the timer and receives a callback method to use when the timer
-    reaches 0 in the Countdown() method.
-    */
+    /* Sets a new value for the timer and receives a callback method to use when the timer
+    reaches 0 in the Countdown() method. */
     public void SetTimer(float timerDuration, Action callbackMethod){
         _timeLeft = timerDuration;
         _timerCallback = callbackMethod;
