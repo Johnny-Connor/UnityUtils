@@ -20,8 +20,10 @@ public class SePlayer : MonoBehaviour
         _audioSource.PlayOneShot(_audioClips[audioClipIndex], 1);
     }
 
-    /* Used to ignore AudioListener.pause, a method which pauses all AudioSources. Useful
-    to keep some audios playing when a pause screen is triggered, for example. */
+    /*
+    Used to ignore AudioListener.pause, a method which pauses all AudioSources. Useful
+    to keep some audios playing when a pause screen is triggered, for example.
+    */
     public void IgnoreListenerPause(bool value)
     {
         _audioSource.ignoreListenerPause = value;
