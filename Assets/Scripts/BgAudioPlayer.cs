@@ -30,9 +30,11 @@ public class BgAudioPlayer : MonoBehaviour
     private int _previouslySelectedAudioClipIndex = -1; /* AudioClip selected to be played
     in the previous instance of .Play or .FadeToAudioClip. */
 
-    private void Awake() {
+    private void Awake()
+    {
 
-        void CopyAudioSourceProperties(AudioSource copyFrom, AudioSource pasteTo){
+        void CopyAudioSourceProperties(AudioSource copyFrom, AudioSource pasteTo)
+        {
             pasteTo.mute = copyFrom.mute;
             pasteTo.outputAudioMixerGroup = copyFrom.outputAudioMixerGroup;
             pasteTo.bypassEffects = copyFrom.bypassEffects;
@@ -64,47 +66,57 @@ public class BgAudioPlayer : MonoBehaviour
 
     /* Only one AudioClip can be played at a time per AudioSource this way, but the audio
     can be managed as it plays. Made for longer AudioClips (mainly music and ambience). */
-    public void Play(int audioClipIndex){
-        if (!_originalAudioSource.isPlaying && !_auxAudioSource.isPlaying){
-            if (_isOriginalAudioSourceBeingUsed){
+    public void Play(int audioClipIndex)
+    {
+        if (!_originalAudioSource.isPlaying && !_auxAudioSource.isPlaying)
+        {
+            if (_isOriginalAudioSourceBeingUsed)
+            {
                 _originalAudioSource.clip = _audioClips[audioClipIndex];
                 _originalAudioSource.Play();
             }
-            else{
+            else
+            {
                 _auxAudioSource.clip = _audioClips[audioClipIndex];
                 _auxAudioSource.Play();
             }
             _previouslySelectedAudioClipIndex = audioClipIndex;
         }
-        else{
+        else
+        {
             Debug.LogWarning("Can't play this AudioClip because another AudioClip is already being played by this script. If you want to switch AudioClips, use BgmPlayer.FadeToAudioClip instead.");
         }
     }
 
     // Stops the AudioSources from playing their current AudioClips.
-    public void Stop(){
+    public void Stop()
+    {
         _originalAudioSource.Stop();
         _auxAudioSource.Stop();
     }
 
     /* Used to ignore AudioListener.pause, a method which pauses all AudioSources. Useful to
     keep some audios playing when a pause screen is triggered, for example. */
-    public void IgnoreListenerPause(bool isIgnoringListenerPause){
+    public void IgnoreListenerPause(bool isIgnoringListenerPause)
+    {
         _originalAudioSource.ignoreListenerPause = isIgnoringListenerPause;
         _auxAudioSource.ignoreListenerPause = isIgnoringListenerPause;
     }
 
     // Fades to another AudioClip.
-    public void FadeToAudioClip(int fadeToAudioClipIndex, float fadeTime = 1.25f){
+    public void FadeToAudioClip(int fadeToAudioClipIndex, float fadeTime = 1.25f)
+    {
 
-        IEnumerator AudioClipTransition(AudioSource fadingOutAudioSource, AudioSource fadingInAudioSource){
+        IEnumerator AudioClipTransition(AudioSource fadingOutAudioSource, AudioSource fadingInAudioSource)
+        {
 
-            void SaveTimeSamples(){
-
+            void SaveTimeSamples()
+            {
                 // Registering the playback position of the fading in AudioClip.
                 _audioClipsTimeSamples[fadeToAudioClipIndex] = fadingInAudioSource.timeSamples;
 
-                if (fadingOutAudioSource.isPlaying){
+                if (fadingOutAudioSource.isPlaying)
+                {
                     // Registering the playback position of the fading out AudioClip.
                     _audioClipsTimeSamples[_previouslySelectedAudioClipIndex] = fadingOutAudioSource.timeSamples;
                 }
@@ -114,7 +126,8 @@ public class BgAudioPlayer : MonoBehaviour
 
             // Switching to the desired fade in AudioClip and playing it.
             fadingInAudioSource.clip = _audioClips[fadeToAudioClipIndex];
-            if (!_ResetAudioClipUponTransition){
+            if (!_ResetAudioClipUponTransition)
+            {
                 fadingInAudioSource.timeSamples = _audioClipsTimeSamples[fadeToAudioClipIndex];
             }
             fadingInAudioSource.Play();
@@ -124,8 +137,8 @@ public class BgAudioPlayer : MonoBehaviour
             float FadingInVolumeBeforeWhile = fadingInAudioSource.volume;
             float FadingOutVolumeBeforeWhile = fadingOutAudioSource.volume;
 
-            while (fadeTimeElapsed < fadeTime){
-                
+            while (fadeTimeElapsed < fadeTime)
+            {
                 /* Saving the playback position of the AudioClips (in case this function is
                 called again during this while loop). */
                 SaveTimeSamples();
@@ -145,7 +158,8 @@ public class BgAudioPlayer : MonoBehaviour
             /* Saving the playback position from the faded out AudioClip one last time
             before stopping the faded out AudioSource. */
             fadingOutAudioSource.Pause();
-            if (fadingOutAudioSource.isPlaying){
+            if (fadingOutAudioSource.isPlaying)
+            {
                 _audioClipsTimeSamples[_previouslySelectedAudioClipIndex] = fadingOutAudioSource.timeSamples;
             }
             fadingOutAudioSource.Stop();
@@ -157,25 +171,30 @@ public class BgAudioPlayer : MonoBehaviour
         }
 
         // If this function is called again before the coroutine ends.
-        if(_isAudioClipTransitionCoroutineRunning){
+        if(_isAudioClipTransitionCoroutineRunning)
+        {
             /* _previouslySelectedAudioClipIndex stores the _selectedAudioClipIndex from the
             previous instance of this function. */
             _previouslySelectedAudioClipIndex = _selectedAudioClipIndex;
         }
 
-        if (fadeToAudioClipIndex == _previouslySelectedAudioClipIndex){
+        if (fadeToAudioClipIndex == _previouslySelectedAudioClipIndex)
+        {
             Debug.LogWarning("Can't fade to an AudioClip which is already being played.");
         }
-        else{
+        else
+        {
             _selectedAudioClipIndex = fadeToAudioClipIndex;
 
             StopAllCoroutines();
             _isAudioClipTransitionCoroutineRunning = false;
 
-            if (_isOriginalAudioSourceBeingUsed){
+            if (_isOriginalAudioSourceBeingUsed)
+            {
                 StartCoroutine( AudioClipTransition( _originalAudioSource, _auxAudioSource ) );
             }
-            else{
+            else
+            {
                 StartCoroutine( AudioClipTransition( _auxAudioSource, _originalAudioSource ) );            
             }
             _isOriginalAudioSourceBeingUsed = !_isOriginalAudioSourceBeingUsed;
