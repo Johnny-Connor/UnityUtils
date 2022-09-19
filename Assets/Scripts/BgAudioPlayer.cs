@@ -163,8 +163,8 @@ public class BgAudioPlayer : MonoBehaviour
 
             /*
             Saving the playback position from the AudioClips one last time before stopping
-            the faded out AudioSource. It's important to save the fading in AudioClip in
-            case 'fadeTime' = 0 (no while loop)
+            the faded out AudioSource. Note: It's important to save the playback position of
+            the fading in AudioClip in case 'fadeTime' = 0 (no while loop).
             */
             fadingOutAudioSource.Pause();
             SaveTimeSamples();
@@ -183,21 +183,6 @@ public class BgAudioPlayer : MonoBehaviour
             */
             _previouslySelectedAudioClipIndex = _selectedAudioClipIndex;
         }
-
-        _selectedAudioClipIndex = fadeToAudioClipIndex;
-
-        StopAllCoroutines();
-        _isAudioClipTransitionCoroutineRunning = false;
-
-        if (_isOriginalAudioSourceBeingUsed)
-        {
-            StartCoroutine( AudioClipTransition( _originalAudioSource, _auxAudioSource ) );
-        }
-        else
-        {
-            StartCoroutine( AudioClipTransition( _auxAudioSource, _originalAudioSource ) );            
-        }
-        _isOriginalAudioSourceBeingUsed = !_isOriginalAudioSourceBeingUsed;
 
         if (fadeToAudioClipIndex == _previouslySelectedAudioClipIndex)
         {
