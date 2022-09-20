@@ -123,12 +123,17 @@ public class BgAudioPlayer : MonoBehaviour
             fadingOutAudioSource.volume = 0;
 
             /*
-            Saving the playback position from the AudioClips one last time before stopping
-            the faded out AudioSource. Note: The playback position of the fading in
-            AudioClip is also saved (important when the while loop doesn't happen).
+            Saving the playback position from the fading out AudioClip one last time before
+            stopping it.
             */
             fadingOutAudioSource.Pause();
-            SaveTimeSamples();
+            if (_previouslySelectedAudioClipIndex >= 0)
+            {
+                // Registering the playback position of the fading out AudioClip.
+                _audioClipsTimeSamples[_previouslySelectedAudioClipIndex] = fadingOutAudioSource.timeSamples;
+            }
+            fadingOutAudioSource.Stop();
+
             // Storing the requested AudioClip of this instance.
             _previouslySelectedAudioClipIndex = _selectedAudioClipIndex;
 
