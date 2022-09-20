@@ -16,19 +16,19 @@ public class BgAudioPlayer : MonoBehaviour
 
     // AudioSources.
     private AudioSource _originalAudioSource, _auxAudioSource; /* Their properties must be 
-    altered together because both AudioSources are used during .FadeToAudioClip */
-    private bool _isOriginalAudioSourceBeingUsed = true; /* If false, _auxAudioSource will
-    be used. */
+    altered together because both AudioSources are used during fading effect */
+    private bool _isOriginalAudioSourceBeingUsed = true; /* False when the other AudioSource
+    is being used. */
 
     // Other variables.
     private bool _isAudioClipTransitionCoroutineRunning;
-    private float _volumeSetBeforeFade; /* Used in .FadeToAudioClip to define how high the 
-    volume of the fading in AudioSource will be by the end of the effect. Must update this
-    value whenever an AudioSource's volume is altered. */
+    private float _maxVolumeSetBeforeFade; /* How high the volume of the fading in 
+    AudioSource will be by the end of the fading in effect. Must update this value whenever
+    an AudioSource's volume is altered. */
     private int _selectedAudioClipIndex = -1; /* AudioClip selected to be played in the
-    current instance of .FadeToAudioClip. */
+    current instance of the fading effect. */
     private int _previouslySelectedAudioClipIndex = -1; /* AudioClip selected to be played
-    in the previous instance of .Play or .FadeToAudioClip. */
+    in the previous instance of fading effect. */
 
     private void Awake()
     {
@@ -57,7 +57,8 @@ public class BgAudioPlayer : MonoBehaviour
         _audioClipsTimeSamples = new int[_audioClips.Length];
 
         _originalAudioSource = GetComponent<AudioSource>();
-        _volumeSetBeforeFade = _originalAudioSource.volume;
+        _maxVolumeSetBeforeFade = _originalAudioSource.volume;
+        _originalAudioSource.volume = 0;
 
         _auxAudioSource = gameObject.AddComponent<AudioSource>();
         CopyAudioSourceProperties(_originalAudioSource, _auxAudioSource);
@@ -68,47 +69,7 @@ public class BgAudioPlayer : MonoBehaviour
     Only one AudioClip can be played at a time per AudioSource this way, but the audio
     can be managed as it plays. Made for longer AudioClips (mainly music and ambience).
     */
-    public void Play(int audioClipIndex)
-    {
-        if (!_originalAudioSource.isPlaying && !_auxAudioSource.isPlaying)
-        {
-            if (_isOriginalAudioSourceBeingUsed)
-            {
-                _originalAudioSource.clip = _audioClips[audioClipIndex];
-                _originalAudioSource.Play();
-            }
-            else
-            {
-                _auxAudioSource.clip = _audioClips[audioClipIndex];
-                _auxAudioSource.Play();
-            }
-            _previouslySelectedAudioClipIndex = audioClipIndex;
-        }
-        else
-        {
-            Debug.LogWarning("Can't play this AudioClip because another AudioClip is already being played by this script. If you want to switch AudioClips, use BgmPlayer.FadeToAudioClip instead.");
-        }
-    }
-
-    // Stops the AudioSources from playing their current AudioClips.
-    public void Stop()
-    {
-        _originalAudioSource.Stop();
-        _auxAudioSource.Stop();
-    }
-
-    /*
-    Used to ignore AudioListener.pause, a method which pauses all AudioSources. Useful to
-    keep some audios playing when a pause screen is triggered, for example.
-    */
-    public void IgnoreListenerPause(bool isIgnoringListenerPause)
-    {
-        _originalAudioSource.ignoreListenerPause = isIgnoringListenerPause;
-        _auxAudioSource.ignoreListenerPause = isIgnoringListenerPause;
-    }
-
-    // Fades to another AudioClip.
-    public void FadeToAudioClip(int fadeToAudioClipIndex, float fadeTime = 1.25f)
+    public void Play(int fadeToAudioClipIndex, float fadeTime = 0)
     {
 
         IEnumerator AudioClipTransition(AudioSource fadingOutAudioSource, AudioSource fadingInAudioSource)
@@ -150,7 +111,7 @@ public class BgAudioPlayer : MonoBehaviour
                 SaveTimeSamples();
 
                 fadingOutAudioSource.volume = Mathf.Lerp(FadingOutVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);
-                fadingInAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, _volumeSetBeforeFade, fadeTimeElapsed/fadeTime);
+                fadingInAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, _maxVolumeSetBeforeFade, fadeTimeElapsed/fadeTime);
                 
                 fadeTimeElapsed += Time.deltaTime;
                 
@@ -158,17 +119,17 @@ public class BgAudioPlayer : MonoBehaviour
             }
 
             // Rounding final volume values because Time.deltaTime is not 100% precise.
-            fadingInAudioSource.volume = _volumeSetBeforeFade;
+            fadingInAudioSource.volume = _maxVolumeSetBeforeFade;
             fadingOutAudioSource.volume = 0;
 
             /*
             Saving the playback position from the AudioClips one last time before stopping
-            the faded out AudioSource. Note: It's important to save the playback position of
-            the fading in AudioClip in case 'fadeTime' = 0 (no while loop).
+            the faded out AudioSource. Note: The playback position of the fading in
+            AudioClip is also saved (important when the while loop doesn't happen).
             */
             fadingOutAudioSource.Pause();
             SaveTimeSamples();
-            // Storing the fadeToAudioClipIndex of this instance.
+            // Storing the requested AudioClip of this instance.
             _previouslySelectedAudioClipIndex = _selectedAudioClipIndex;
 
             _isAudioClipTransitionCoroutineRunning = false;
@@ -177,10 +138,7 @@ public class BgAudioPlayer : MonoBehaviour
         // If this function is called again before the coroutine ends.
         if(_isAudioClipTransitionCoroutineRunning)
         {
-            /*
-            _previouslySelectedAudioClipIndex stores the _selectedAudioClipIndex from the
-            previous instance of this function.
-            */
+            // Storing the AudioClip selected in the previous instance of this function.
             _previouslySelectedAudioClipIndex = _selectedAudioClipIndex;
         }
 
@@ -206,6 +164,23 @@ public class BgAudioPlayer : MonoBehaviour
             _isOriginalAudioSourceBeingUsed = !_isOriginalAudioSourceBeingUsed;
         }
 
+    }
+
+    // Stops the AudioSources from playing their current AudioClips.
+    public void Stop()
+    {
+        _originalAudioSource.Stop();
+        _auxAudioSource.Stop();
+    }
+
+    /*
+    Used to ignore AudioListener.pause, a method which pauses all AudioSources. Useful to
+    keep some audios playing when a pause screen is triggered, for example.
+    */
+    public void IgnoreListenerPause(bool isIgnoringListenerPause)
+    {
+        _originalAudioSource.ignoreListenerPause = isIgnoringListenerPause;
+        _auxAudioSource.ignoreListenerPause = isIgnoringListenerPause;
     }
 
 }
