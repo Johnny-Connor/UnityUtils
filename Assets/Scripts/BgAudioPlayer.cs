@@ -89,15 +89,19 @@ public class BgAudioPlayer : MonoBehaviour
 
             _isAudioClipTransitionCoroutineRunning = true;
 
-            // Switching to the desired fade in AudioClip and playing it.
+            /*
+            Switching to the desired fade in AudioClip and playing it at the correct playback
+            position.
+            */
             fadingInAudioSource.clip = _audioClips[fadeToAudioClipIndex];
-            if (!_ResetAudioClipUponTransition)
+            if (_ResetAudioClipUponTransition)
             {
-                fadingInAudioSource.timeSamples = _audioClipsTimeSamples[fadeToAudioClipIndex];
+                _audioClipsTimeSamples[fadeToAudioClipIndex] = 0;
             }
+            fadingInAudioSource.timeSamples = _audioClipsTimeSamples[fadeToAudioClipIndex];
             fadingInAudioSource.Play();
 
-            // Variables used in while loop.
+            // Variables used in while loop below.
             float fadeTimeElapsed = 0;
             float FadingInVolumeBeforeWhile = fadingInAudioSource.volume;
             float FadingOutVolumeBeforeWhile = fadingOutAudioSource.volume;
