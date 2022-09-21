@@ -25,9 +25,9 @@ public class BgAudioPlayer : MonoBehaviour
     private float _maxVolumeSetBeforeFade; /* How high the volume of the fading in 
     AudioSource will be by the end of the fading in effect. Must update this value whenever
     an AudioSource's volume is altered. */
-    private int _selectedAudioClipIndex = -1; /* AudioClip selected to be played in the
+    private int _requestedAudioClipIndex = -1; /* AudioClip requested to be played in the
     current instance of the fading effect. */
-    private int _previouslySelectedAudioClipIndex = -1; /* AudioClip selected to be played
+    private int _previouslyRequestedAudioClipIndex = -1; /* AudioClip requested to be played
     in the previous instance of fading effect. */
 
     private void Awake()
@@ -80,10 +80,10 @@ public class BgAudioPlayer : MonoBehaviour
                 // Registering the playback position of the fading in AudioClip.
                 _audioClipsTimeSamples[fadeToAudioClipIndex] = fadingInAudioSource.timeSamples;
 
-                if (_previouslySelectedAudioClipIndex >= 0)
+                if (_previouslyRequestedAudioClipIndex >= 0)
                 {
                     // Registering the playback position of the fading out AudioClip.
-                    _audioClipsTimeSamples[_previouslySelectedAudioClipIndex] = fadingOutAudioSource.timeSamples;
+                    _audioClipsTimeSamples[_previouslyRequestedAudioClipIndex] = fadingOutAudioSource.timeSamples;
                 }
             }
 
@@ -127,37 +127,38 @@ public class BgAudioPlayer : MonoBehaviour
             stopping it.
             */
             fadingOutAudioSource.Pause();
-            if (_previouslySelectedAudioClipIndex >= 0)
+            if (_previouslyRequestedAudioClipIndex >= 0)
             {
                 // Registering the playback position of the fading out AudioClip.
-                _audioClipsTimeSamples[_previouslySelectedAudioClipIndex] = fadingOutAudioSource.timeSamples;
+                _audioClipsTimeSamples[_previouslyRequestedAudioClipIndex] = fadingOutAudioSource.timeSamples;
             }
             fadingOutAudioSource.Stop();
 
             // Storing the requested AudioClip of this instance.
-            _previouslySelectedAudioClipIndex = _selectedAudioClipIndex;
+            _previouslyRequestedAudioClipIndex = _requestedAudioClipIndex;
 
             _isAudioClipTransitionCoroutineRunning = false;
+            
         }
 
-        // If this function is called again before the coroutine ends.
+        // If this function is called again before its coroutine ends.
         if(_isAudioClipTransitionCoroutineRunning)
         {
-            // Storing the AudioClip selected in the previous instance of this function.
-            _previouslySelectedAudioClipIndex = _selectedAudioClipIndex;
-        }
-
-        if (fadeToAudioClipIndex == _previouslySelectedAudioClipIndex)
-        {
-            Debug.LogWarning("Can't fade to an AudioClip which is already being played.");
-        }
-        else
-        {
-            _selectedAudioClipIndex = fadeToAudioClipIndex;
-
             StopAllCoroutines();
             _isAudioClipTransitionCoroutineRunning = false;
 
+            // Storing the AudioClip requested in the previous instance of this function.
+            _previouslyRequestedAudioClipIndex = _requestedAudioClipIndex;
+        }
+
+        _requestedAudioClipIndex = fadeToAudioClipIndex;
+
+        if (_previouslyRequestedAudioClipIndex == _requestedAudioClipIndex)
+        {
+            Debug.LogWarning("The requested AudioClip is already being played.");
+        }
+        else
+        {
             if (_isOriginalAudioSourceBeingUsed)
             {
                 StartCoroutine( AudioClipTransition( _originalAudioSource, _auxAudioSource ) );
