@@ -72,14 +72,17 @@ public class BgAudioPlayer : MonoBehaviour
     public void Play(int fadeToAudioClipIndex, float fadeTime = 0)
     {
 
-        IEnumerator AudioClipTransition(AudioSource fadingOutAudioSource, AudioSource fadingInAudioSource)
+        IEnumerator AudioClipTransition(AudioSource fadingInAudioSource, AudioSource fadingOutAudioSource)
         {
 
-            void SaveTimeSamples()
+            void SaveTimeSamplesFromFadingInAudioClip()
             {
                 // Registering the playback position of the fading in AudioClip.
                 _audioClipsTimeSamples[fadeToAudioClipIndex] = fadingInAudioSource.timeSamples;
+            }
 
+            void SaveTimeSamplesFromFadingOutAudioClip()
+            {
                 if (_previouslyRequestedAudioClipIndex >= 0)
                 {
                     // Registering the playback position of the fading out AudioClip.
@@ -112,7 +115,8 @@ public class BgAudioPlayer : MonoBehaviour
                 Saving the playback position of the AudioClips (in case this function is
                 called again during this while loop).
                 */
-                SaveTimeSamples();
+                SaveTimeSamplesFromFadingInAudioClip();
+                SaveTimeSamplesFromFadingOutAudioClip();
 
                 fadingOutAudioSource.volume = Mathf.Lerp(FadingOutVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);
                 fadingInAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, _maxVolumeSetBeforeFade, fadeTimeElapsed/fadeTime);
@@ -131,11 +135,7 @@ public class BgAudioPlayer : MonoBehaviour
             stopping it.
             */
             fadingOutAudioSource.Pause();
-            if (_previouslyRequestedAudioClipIndex >= 0)
-            {
-                // Registering the playback position of the fading out AudioClip.
-                _audioClipsTimeSamples[_previouslyRequestedAudioClipIndex] = fadingOutAudioSource.timeSamples;
-            }
+            SaveTimeSamplesFromFadingOutAudioClip();
             fadingOutAudioSource.Stop();
 
             // Storing the requested AudioClip of this instance.
