@@ -112,7 +112,7 @@ public class BgAudioPlayer : MonoBehaviour
             while (fadeTimeElapsed < fadeTime)
             {
                 /*
-                Saving the playback position of the AudioClips (in case this function is
+                Saving the playback position of the AudioClips (in case this function gets
                 called again during this while loop).
                 */
                 SaveTimeSamplesFromFadingInAudioClip();
