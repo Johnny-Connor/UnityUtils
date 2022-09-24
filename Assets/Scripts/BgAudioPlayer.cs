@@ -16,14 +16,14 @@ public class BgAudioPlayer : MonoBehaviour
 
     // AudioSources.
     private AudioSource _originalAudioSource, _auxAudioSource; /* Their properties must be 
-    altered together because both AudioSources are used during fading effect */
+    altered together because both AudioSources are used during fading effects */
     private bool _isOriginalAudioSourceBeingUsed = true; /* False when the other AudioSource
     is being used. */
 
     // Variables used in .Play.
     private float _maxVolumeSetBeforeFade; /* How high the volume of the fading in
-    AudioSource will be by the end of the .Play function. Must update this value whenever an
-    AudioSource's volume is altered. */
+    AudioSource will be by the end of the .Play function. Must update this value whenever
+    the volume of an AudioSource is altered */
     private int _requestedAudioClipIndex = -1; /* AudioClip requested to be played in the
     current instance of the .Play function. */
 
@@ -70,7 +70,7 @@ public class BgAudioPlayer : MonoBehaviour
     {
 
         int _previouslyRequestedAudioClipIndex; /* AudioClip requested to be played in the
-        previous instance of this function. */
+        previous instance. */
 
         IEnumerator AudioClipTransition(AudioSource fadingInAudioSource, AudioSource fadingOutAudioSource)
         {
@@ -137,10 +137,10 @@ public class BgAudioPlayer : MonoBehaviour
             
         }
 
-        // Storing the requested AudioClip of the previous instance.
+        // Storing the AudioClip requested in the previous instance.
         _previouslyRequestedAudioClipIndex = _requestedAudioClipIndex;
 
-        // Storing the requested AudioClip of this instance.
+        // Storing the AudioClip requested in this instance.
         _requestedAudioClipIndex = fadeToAudioClipIndex;
 
         if (_previouslyRequestedAudioClipIndex == _requestedAudioClipIndex && (_originalAudioSource.isPlaying || _auxAudioSource.isPlaying))
@@ -168,8 +168,8 @@ public class BgAudioPlayer : MonoBehaviour
     public void Stop()
     {
         /*
-        .Pause is used to prevent the AudioSource's TimeSamples from resetting (this would
-        make .SaveTimeSamplesFromPreviouslyRequestedAudioClip not work).
+        .Pause is used to prevent the TimeSamples of the AudioSources from resetting (this 
+        would make .SaveTimeSamplesFromPreviouslyRequestedAudioClip not work).
         */
         if (_isOriginalAudioSourceBeingUsed)
         {
