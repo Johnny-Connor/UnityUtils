@@ -21,12 +21,12 @@ public class BgAudioPlayer : MonoBehaviour
     private bool _isOriginalAudioSourceBeingUsed = true; /* False when the other AudioSource
     is being used. */
 
-    // Variables used in .Play.
+    // Other variables.
     private float _maxVolumeSetBeforeFade; /* How high the volume of the fading in
     AudioSource will be by the end of the .Play function. Must update this value whenever
     the volume of an AudioSource is altered */
     private int _requestedAudioClipIndex = -1; /* AudioClip requested to be played in the
-    current instance of the .Play function. */
+    current instance of the .Play function. Negative values represent silence. */
     #endregion Variables
 
     private void Awake()
@@ -69,28 +69,104 @@ public class BgAudioPlayer : MonoBehaviour
     Only one AudioClip can be played at a time per AudioSource this way, but the audio can
     be managed as it plays. Made for longer AudioClips (mainly music and ambience).
     */
-    public void Play(int fadeToAudioClipIndex, float fadeTime = 0)
+    public void Play(int AudioClipIndex, float fadeTime = 0)
     {
 
         int _previouslyRequestedAudioClipIndex; /* AudioClip requested to be played in the
-        previous instance. */
+        previous instance of this function. */
 
-        IEnumerator AudioClipTransition(AudioSource fadingInAudioSource, AudioSource fadingOutAudioSource)
+        void AudioClipTransition (AudioSource NotInUseAudioSource, AudioSource InUseAudioSource)
         {
 
-            void SaveTimeSamplesFromRequestedAudioClip()
+            void SwitchToAndPlayRequestedAudioClip()
             {
-                // Registering the playback position of the fading in AudioClip.
-                _audioClipsTimeSamples[_requestedAudioClipIndex] = fadingInAudioSource.timeSamples;
+                if (AudioClipIndex >= 0)
+                {
+                    /*
+                    Switching to the requested AudioClip and playing it at the correct playback
+                    position.
+                    */
+                    NotInUseAudioSource.clip = _audioClips[AudioClipIndex];
+                    if (_ResetAudioClipUponTransition)
+                    {
+                        _audioClipsTimeSamples[AudioClipIndex] = 0;
+                    }
+                    NotInUseAudioSource.timeSamples = _audioClipsTimeSamples[AudioClipIndex];
+                    NotInUseAudioSource.Play();
+                }
             }
 
             void SaveTimeSamplesFromPreviouslyRequestedAudioClip()
             {
                 if (_previouslyRequestedAudioClipIndex >= 0)
                 {
-                    // Registering the playback position of the fading out AudioClip.
-                    _audioClipsTimeSamples[_previouslyRequestedAudioClipIndex] = fadingOutAudioSource.timeSamples;
+                    // Registering the playback position of the previously requested AudioClip.
+                    _audioClipsTimeSamples[_previouslyRequestedAudioClipIndex] = InUseAudioSource.timeSamples;
                 }
+            }
+
+            IEnumerator VolumeTransition()
+            {
+
+                void SaveTimeSamplesFromRequestedAudioClip()
+                {
+                    if (_requestedAudioClipIndex >= 0)
+                    {
+                        // Registering the playback position of the requested AudioClip.
+                        _audioClipsTimeSamples[_requestedAudioClipIndex] = NotInUseAudioSource.timeSamples;
+                    }
+                }
+
+                // Variables used in while loop below.
+                float fadeTimeElapsed = 0;
+                float FadingInVolumeBeforeWhile = NotInUseAudioSource.volume;
+                float FadingOutVolumeBeforeWhile = InUseAudioSource.volume;
+
+                while (fadeTimeElapsed < fadeTime)
+                {
+                    /*
+                    Saving the playback position of the AudioClips (in case this function gets
+                    called again during this while loop).
+                    */
+                    SaveTimeSamplesFromPreviouslyRequestedAudioClip();
+                    SaveTimeSamplesFromRequestedAudioClip();
+
+                    InUseAudioSource.volume = Mathf.Lerp(FadingOutVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);
+                    if (AudioClipIndex >= 0)
+                    {
+                        NotInUseAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, _maxVolumeSetBeforeFade, fadeTimeElapsed/fadeTime);
+                    }
+                    else
+                    {
+                        NotInUseAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);                
+                    }
+
+                    fadeTimeElapsed += Time.deltaTime;
+                    
+                    yield return null;
+                }
+
+                if (AudioClipIndex >= 0)
+                {
+                    // Rounding final volume values because Time.deltaTime is not 100% precise.
+                    NotInUseAudioSource.volume = _maxVolumeSetBeforeFade;
+                    InUseAudioSource.volume = 0;
+                    InUseAudioSource.Stop();
+                }
+                else
+                {
+                    // Rounding final volume values because Time.deltaTime is not 100% precise.
+                    NotInUseAudioSource.volume = 0;
+                    InUseAudioSource.volume = 0;
+
+                    /*
+                    .Pause is used to prevent the TimeSamples of the AudioSources from resetting (this 
+                    would make .SaveTimeSamplesFromPreviouslyRequestedAudioClip not work).
+                    */
+                    InUseAudioSource.Pause();
+                    NotInUseAudioSource.Stop();
+                }
+
             }
 
             /*
@@ -99,91 +175,37 @@ public class BgAudioPlayer : MonoBehaviour
             */
             SaveTimeSamplesFromPreviouslyRequestedAudioClip();
 
-            /*
-            Switching to the desired fade in AudioClip and playing it at the correct
-            playback position.
-            */
-            fadingInAudioSource.clip = _audioClips[fadeToAudioClipIndex];
-            if (_ResetAudioClipUponTransition)
-            {
-                _audioClipsTimeSamples[fadeToAudioClipIndex] = 0;
-            }
-            fadingInAudioSource.timeSamples = _audioClipsTimeSamples[fadeToAudioClipIndex];
-            fadingInAudioSource.Play();
+            SwitchToAndPlayRequestedAudioClip();
 
-            // Variables used in while loop below.
-            float fadeTimeElapsed = 0;
-            float FadingInVolumeBeforeWhile = fadingInAudioSource.volume;
-            float FadingOutVolumeBeforeWhile = fadingOutAudioSource.volume;
+            StopAllCoroutines();
 
-            while (fadeTimeElapsed < fadeTime)
-            {
-                /*
-                Saving the playback position of the fading in AudioClip (in case this
-                function gets called again during this while loop).
-                */
-                SaveTimeSamplesFromRequestedAudioClip();
+            StartCoroutine( VolumeTransition() );
 
-                fadingOutAudioSource.volume = Mathf.Lerp(FadingOutVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);
-                fadingInAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, _maxVolumeSetBeforeFade, fadeTimeElapsed/fadeTime);
-                
-                fadeTimeElapsed += Time.deltaTime;
-                
-                yield return null;
-            }
-
-            // Rounding final volume values because Time.deltaTime is not 100% precise.
-            fadingInAudioSource.volume = _maxVolumeSetBeforeFade;
-            fadingOutAudioSource.volume = 0;
-
-            fadingOutAudioSource.Stop();
-            
         }
 
         // Storing the AudioClip requested in the previous instance.
         _previouslyRequestedAudioClipIndex = _requestedAudioClipIndex;
 
         // Storing the AudioClip requested in this instance.
-        _requestedAudioClipIndex = fadeToAudioClipIndex;
+        _requestedAudioClipIndex = AudioClipIndex;
 
-        if (_previouslyRequestedAudioClipIndex == _requestedAudioClipIndex && (_originalAudioSource.isPlaying || _auxAudioSource.isPlaying))
+        if ( _previouslyRequestedAudioClipIndex == _requestedAudioClipIndex && ( _originalAudioSource.isPlaying || _auxAudioSource.isPlaying ) )
         {
             Debug.LogWarning("The requested AudioClip is already being played.");
         }
         else
         {
-            StopAllCoroutines();
-
             if (_isOriginalAudioSourceBeingUsed)
             {
-                StartCoroutine( AudioClipTransition( _auxAudioSource, _originalAudioSource ) );
+                AudioClipTransition(_auxAudioSource, _originalAudioSource);
             }
             else
             {
-                StartCoroutine( AudioClipTransition( _originalAudioSource, _auxAudioSource ) );          
+                AudioClipTransition(_originalAudioSource, _auxAudioSource);
             }
             _isOriginalAudioSourceBeingUsed = !_isOriginalAudioSourceBeingUsed;
         }
 
-    }
-
-    // Stops the AudioSources from playing their current AudioClips.
-    public void Stop()
-    {
-        /*
-        .Pause is used to prevent the TimeSamples of the AudioSources from resetting (this 
-        would make .SaveTimeSamplesFromPreviouslyRequestedAudioClip not work).
-        */
-        if (_isOriginalAudioSourceBeingUsed)
-        {
-            _originalAudioSource.Pause();
-            _auxAudioSource.Stop();
-        }
-        else
-        {
-            _auxAudioSource.Pause();
-            _originalAudioSource.Stop();
-        }
     }
 
     /*
