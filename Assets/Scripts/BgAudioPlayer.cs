@@ -4,6 +4,7 @@ using UnityEngine;
 public class BgAudioPlayer : MonoBehaviour
 {
 
+    #region Variables
     // Settings.
     [Tooltip("Will the next song start from the beginning?")]
     [SerializeField] private bool _ResetAudioClipUponTransition;
@@ -26,6 +27,7 @@ public class BgAudioPlayer : MonoBehaviour
     the volume of an AudioSource is altered */
     private int _requestedAudioClipIndex = -1; /* AudioClip requested to be played in the
     current instance of the .Play function. */
+    #endregion Variables
 
     private void Awake()
     {
@@ -62,6 +64,7 @@ public class BgAudioPlayer : MonoBehaviour
 
     }
 
+    #region Custom Functions/Methods
     /*
     Only one AudioClip can be played at a time per AudioSource this way, but the audio can
     be managed as it plays. Made for longer AudioClips (mainly music and ambience).
@@ -192,5 +195,6 @@ public class BgAudioPlayer : MonoBehaviour
         _originalAudioSource.ignoreListenerPause = isIgnoringListenerPause;
         _auxAudioSource.ignoreListenerPause = isIgnoringListenerPause;
     }
+    #endregion Custom Functions/Methods
 
 }
