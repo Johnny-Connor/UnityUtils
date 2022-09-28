@@ -7,7 +7,7 @@ public class BgAudioPlayer : MonoBehaviour
     #region Variables
     // Settings.
     [Tooltip("Will the next song start from the beginning?")]
-    [SerializeField] private bool _ResetAudioClipUponTransition;
+    [SerializeField] private bool _resetAudioClipUponTransition;
 
     // AudioClips.
     [Tooltip("AudioClips available to play.")]
@@ -87,7 +87,7 @@ public class BgAudioPlayer : MonoBehaviour
                     position.
                     */
                     NotInUseAudioSource.clip = _audioClips[AudioClipIndex];
-                    if (_ResetAudioClipUponTransition)
+                    if (_resetAudioClipUponTransition)
                     {
                         _audioClipsTimeSamples[AudioClipIndex] = 0;
                     }
