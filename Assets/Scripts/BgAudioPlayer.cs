@@ -19,11 +19,11 @@ public class BgAudioPlayer : MonoBehaviour
     altered together because both AudioSources are used during fading effects */
     private bool _isOriginalAudioSourceBeingUsed = true; /* False when the other AudioSource
     is being used. */
-
-    // Other variables.
     private float _maxVolumeSetBeforeTransition; /* How high the volume of the fading in
     AudioSource will be by the end of the .Play function. Must update this value whenever
     the volume of an AudioSource is altered */
+
+    // Other variables.
     private int _requestedAudioClipIndex = -1; /* AudioClip requested to be played in the
     current instance of the .Play function. Negative values represent silence. */
     #endregion Variables
