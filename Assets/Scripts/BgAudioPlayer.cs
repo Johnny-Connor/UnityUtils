@@ -85,8 +85,8 @@ public class BgAudioPlayer : MonoBehaviour
                 if (AudioClipIndex >= 0)
                 {
                     /*
-                    Switching to the requested AudioClip and playing it at the correct playback
-                    position.
+                    Switching to the requested AudioClip and playing it at the correct 
+                    playback position.
                     */
                     NotInUseAudioSource.clip = _audioClips[AudioClipIndex];
                     if (_resetAudioClipUponTransition)
@@ -102,7 +102,9 @@ public class BgAudioPlayer : MonoBehaviour
             {
                 if (_previouslyRequestedAudioClipIndex >= 0)
                 {
-                    // Registering the playback position of the previously requested AudioClip.
+                    /*
+                    Registering the playback position of the previously requested AudioClip.
+                    */
                     _audioClipsTimeSamples[_previouslyRequestedAudioClipIndex] = InUseAudioSource.timeSamples;
                 }
             }
@@ -127,8 +129,8 @@ public class BgAudioPlayer : MonoBehaviour
                 while (fadeTimeElapsed < fadeTime)
                 {
                     /*
-                    Saving the playback position of the AudioClips (in case this function gets
-                    called again during this while loop).
+                    Saving the playback position of the AudioClips (in case this function
+                    gets called again during this while loop).
                     */
                     SaveTimeSamplesFromPreviouslyRequestedAudioClip();
                     SaveTimeSamplesFromRequestedAudioClip();
@@ -150,20 +152,25 @@ public class BgAudioPlayer : MonoBehaviour
 
                 if (AudioClipIndex >= 0)
                 {
-                    // Rounding final volume values because Time.deltaTime is not 100% precise.
+                    /*
+                    Rounding final volume values because Time.deltaTime is not 100% precise.
+                    */
                     NotInUseAudioSource.volume = _maxVolumeSetBeforeFade;
                     InUseAudioSource.volume = 0;
                     InUseAudioSource.Stop();
                 }
                 else
                 {
-                    // Rounding final volume values because Time.deltaTime is not 100% precise.
+                    /*
+                    Rounding final volume values because Time.deltaTime is not 100% precise.
+                    */
                     NotInUseAudioSource.volume = 0;
                     InUseAudioSource.volume = 0;
 
                     /*
-                    .Pause is used to prevent the TimeSamples of the AudioSources from resetting (this 
-                    would make .SaveTimeSamplesFromPreviouslyRequestedAudioClip not work).
+                    .Pause is used to prevent the TimeSamples of the AudioSources from 
+                    resetting (this would make 
+                    .SaveTimeSamplesFromPreviouslyRequestedAudioClip not work).
                     */
                     InUseAudioSource.Pause();
                     NotInUseAudioSource.Stop();
