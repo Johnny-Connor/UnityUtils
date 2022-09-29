@@ -29,6 +29,7 @@ public class BgAudioPlayer : MonoBehaviour
     current instance of the .Play function. Negative values represent silence. */
     #endregion Variables
 
+    #region MonoBehaviour Functions/Methods
     private void Awake()
     {
 
@@ -63,6 +64,7 @@ public class BgAudioPlayer : MonoBehaviour
         CopyAudioSourceProperties(_originalAudioSource, _auxAudioSource);
 
     }
+    #endregion MonoBehaviour Functions/Methods
 
     #region Custom Functions/Methods
     /*
@@ -218,5 +220,13 @@ public class BgAudioPlayer : MonoBehaviour
         _auxAudioSource.ignoreListenerPause = isIgnoringListenerPause;
     }
     #endregion Custom Functions/Methods
+
+    #region Properties
+    public bool ResetAudioClipUponTransition
+    {
+        get { return _resetAudioClipUponTransition; }
+        set { _resetAudioClipUponTransition = value; }
+    }
+    #endregion Properties
 
 }
