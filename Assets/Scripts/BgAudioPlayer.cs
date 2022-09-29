@@ -21,7 +21,7 @@ public class BgAudioPlayer : MonoBehaviour
     is being used. */
 
     // Other variables.
-    private float _maxVolumeSetBeforeFade; /* How high the volume of the fading in
+    private float _maxVolumeSetBeforeTransition; /* How high the volume of the fading in
     AudioSource will be by the end of the .Play function. Must update this value whenever
     the volume of an AudioSource is altered */
     private int _requestedAudioClipIndex = -1; /* AudioClip requested to be played in the
@@ -56,7 +56,7 @@ public class BgAudioPlayer : MonoBehaviour
         _audioClipsTimeSamples = new int[_audioClips.Length];
 
         _originalAudioSource = GetComponent<AudioSource>();
-        _maxVolumeSetBeforeFade = _originalAudioSource.volume;
+        _maxVolumeSetBeforeTransition = _originalAudioSource.volume;
         _originalAudioSource.volume = 0;
 
         _auxAudioSource = gameObject.AddComponent<AudioSource>();
@@ -122,8 +122,8 @@ public class BgAudioPlayer : MonoBehaviour
 
                 // Variables used in while loop below.
                 float fadeTimeElapsed = 0;
-                float FadingInVolumeBeforeWhile = NotInUseAudioSource.volume;
-                float FadingOutVolumeBeforeWhile = InUseAudioSource.volume;
+                float NotInUseAudioSourceVolumeBeforeWhile = NotInUseAudioSource.volume;
+                float InUseAudioSourceVolumeBeforeWhile = InUseAudioSource.volume;
 
                 while (fadeTimeElapsed < fadeTime)
                 {
@@ -134,14 +134,14 @@ public class BgAudioPlayer : MonoBehaviour
                     SaveTimeSamplesFromPreviouslyRequestedAudioClip();
                     SaveTimeSamplesFromRequestedAudioClip();
 
-                    InUseAudioSource.volume = Mathf.Lerp(FadingOutVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);
+                    InUseAudioSource.volume = Mathf.Lerp(InUseAudioSourceVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);
                     if (audioClipIndex >= 0)
                     {
-                        NotInUseAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, _maxVolumeSetBeforeFade, fadeTimeElapsed/fadeTime);
+                        NotInUseAudioSource.volume = Mathf.Lerp(NotInUseAudioSourceVolumeBeforeWhile, _maxVolumeSetBeforeTransition, fadeTimeElapsed/fadeTime);
                     }
                     else
                     {
-                        NotInUseAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);                
+                        NotInUseAudioSource.volume = Mathf.Lerp(NotInUseAudioSourceVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);                
                     }
 
                     fadeTimeElapsed += Time.deltaTime;
@@ -154,7 +154,7 @@ public class BgAudioPlayer : MonoBehaviour
                     /*
                     Rounding final volume values because Time.deltaTime is not 100% precise.
                     */
-                    NotInUseAudioSource.volume = _maxVolumeSetBeforeFade;
+                    NotInUseAudioSource.volume = _maxVolumeSetBeforeTransition;
                     InUseAudioSource.volume = 0;
                     InUseAudioSource.Stop();
                 }
