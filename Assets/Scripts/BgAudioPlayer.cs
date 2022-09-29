@@ -12,8 +12,7 @@ public class BgAudioPlayer : MonoBehaviour
     // AudioClips.
     [Tooltip("AudioClips available to play.")]
     [SerializeField] private AudioClip[] _audioClips;
-    private int[] _audioClipsTimeSamples; /* Stores the playback position of each
-    AudioClip. */
+    private int[] _audioClipsTimeSamples; // Stores the playback position of each AudioClip.
 
     // AudioSources.
     private AudioSource _originalAudioSource, _auxAudioSource; /* Their properties must be 
