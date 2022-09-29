@@ -71,7 +71,7 @@ public class BgAudioPlayer : MonoBehaviour
     Only one AudioClip can be played at a time per AudioSource this way, but the audio can
     be managed as it plays. Made for longer AudioClips (mainly music and ambience).
     */
-    public void Play(int AudioClipIndex, float fadeTime = 0)
+    public void Play(int audioClipIndex, float fadeTime = 0)
     {
 
         int _previouslyRequestedAudioClipIndex; /* AudioClip requested to be played in the
@@ -82,18 +82,18 @@ public class BgAudioPlayer : MonoBehaviour
 
             void SwitchToAndPlayRequestedAudioClip()
             {
-                if (AudioClipIndex >= 0)
+                if (audioClipIndex >= 0)
                 {
                     /*
                     Switching to the requested AudioClip and playing it at the correct 
                     playback position.
                     */
-                    NotInUseAudioSource.clip = _audioClips[AudioClipIndex];
+                    NotInUseAudioSource.clip = _audioClips[audioClipIndex];
                     if (_resetAudioClipUponTransition)
                     {
-                        _audioClipsTimeSamples[AudioClipIndex] = 0;
+                        _audioClipsTimeSamples[audioClipIndex] = 0;
                     }
-                    NotInUseAudioSource.timeSamples = _audioClipsTimeSamples[AudioClipIndex];
+                    NotInUseAudioSource.timeSamples = _audioClipsTimeSamples[audioClipIndex];
                     NotInUseAudioSource.Play();
                 }
             }
@@ -136,7 +136,7 @@ public class BgAudioPlayer : MonoBehaviour
                     SaveTimeSamplesFromRequestedAudioClip();
 
                     InUseAudioSource.volume = Mathf.Lerp(FadingOutVolumeBeforeWhile, 0, fadeTimeElapsed/fadeTime);
-                    if (AudioClipIndex >= 0)
+                    if (audioClipIndex >= 0)
                     {
                         NotInUseAudioSource.volume = Mathf.Lerp(FadingInVolumeBeforeWhile, _maxVolumeSetBeforeFade, fadeTimeElapsed/fadeTime);
                     }
@@ -150,7 +150,7 @@ public class BgAudioPlayer : MonoBehaviour
                     yield return null;
                 }
 
-                if (AudioClipIndex >= 0)
+                if (audioClipIndex >= 0)
                 {
                     /*
                     Rounding final volume values because Time.deltaTime is not 100% precise.
@@ -196,9 +196,9 @@ public class BgAudioPlayer : MonoBehaviour
         _previouslyRequestedAudioClipIndex = _requestedAudioClipIndex;
 
         // Storing the AudioClip requested in this instance.
-        _requestedAudioClipIndex = AudioClipIndex;
+        _requestedAudioClipIndex = audioClipIndex;
 
-        if ( _previouslyRequestedAudioClipIndex == _requestedAudioClipIndex && ( _originalAudioSource.isPlaying || _auxAudioSource.isPlaying ) )
+        if ( ( _previouslyRequestedAudioClipIndex == _requestedAudioClipIndex ) || ( _previouslyRequestedAudioClipIndex <= -1 && _requestedAudioClipIndex <= -1 ) )
         {
             Debug.LogWarning("The requested AudioClip is already being played.");
         }
