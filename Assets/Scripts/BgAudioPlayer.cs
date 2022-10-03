@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class BgAudioPlayer : MonoBehaviour
 {
-
     #region Variables
     // Settings.
     [Tooltip("Will the next song start from the beginning?")]
@@ -31,7 +30,6 @@ public class BgAudioPlayer : MonoBehaviour
     #region MonoBehaviour Functions/Methods
     private void Awake()
     {
-
         void CopyAudioSourceProperties(AudioSource copyFrom, AudioSource pasteTo)
         {
             pasteTo.mute = copyFrom.mute;
@@ -61,7 +59,6 @@ public class BgAudioPlayer : MonoBehaviour
 
         _auxAudioSource = gameObject.AddComponent<AudioSource>();
         CopyAudioSourceProperties(_originalAudioSource, _auxAudioSource);
-
     }
     #endregion MonoBehaviour Functions/Methods
 
@@ -72,13 +69,11 @@ public class BgAudioPlayer : MonoBehaviour
     */
     public void Play(int audioClipIndex, float fadeTime = 0)
     {
-
         int _previouslyRequestedAudioClipIndex; /* AudioClip requested to be played in the
         previous instance of this function. */
 
         void AudioClipTransition (AudioSource NotInUseAudioSource, AudioSource InUseAudioSource)
         {
-
             void SwitchToAndPlayRequestedAudioClip()
             {
                 if (audioClipIndex >= 0)
@@ -110,7 +105,6 @@ public class BgAudioPlayer : MonoBehaviour
 
             IEnumerator VolumeTransition()
             {
-
                 void SaveTimeSamplesFromRequestedAudioClip()
                 {
                     if (_requestedAudioClipIndex >= 0)
@@ -174,7 +168,6 @@ public class BgAudioPlayer : MonoBehaviour
                     InUseAudioSource.Pause();
                     NotInUseAudioSource.Stop();
                 }
-
             }
 
             /*
@@ -188,7 +181,6 @@ public class BgAudioPlayer : MonoBehaviour
             StopAllCoroutines();
 
             StartCoroutine( VolumeTransition() );
-
         }
 
         // Storing the AudioClip requested in the previous instance.
@@ -213,7 +205,6 @@ public class BgAudioPlayer : MonoBehaviour
             }
             _isOriginalAudioSourceBeingUsed = !_isOriginalAudioSourceBeingUsed;
         }
-
     }
 
     /*
@@ -234,5 +225,4 @@ public class BgAudioPlayer : MonoBehaviour
         set { _resetAudioClipUponTransition = value; }
     }
     #endregion Properties
-
 }

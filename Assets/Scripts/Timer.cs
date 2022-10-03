@@ -3,13 +3,11 @@ using UnityEngine;
 
 public class Timer : MonoBehaviour
 {
-
     private Action _timerCallback;
     private float _timeLeft;
 
     private void Update()
     {
-
         void Countdown()
         {
             if (_timeLeft > 0)
@@ -23,7 +21,6 @@ public class Timer : MonoBehaviour
         }
 
         Countdown();
-
     }
 
     public float GetTimeLeft()
@@ -40,5 +37,4 @@ public class Timer : MonoBehaviour
         _timeLeft = timerDuration;
         _timerCallback = callbackMethod;
     }
-
 }

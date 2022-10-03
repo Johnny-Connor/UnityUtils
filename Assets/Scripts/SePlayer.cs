@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class SePlayer : MonoBehaviour
 {
-
     [Tooltip("AudioSource components.")]
     private AudioSource _audioSource;
 
@@ -28,5 +27,4 @@ public class SePlayer : MonoBehaviour
     {
         _audioSource.ignoreListenerPause = value;
     }
-
 }
