@@ -20,8 +20,8 @@ public class SePlayer : MonoBehaviour
     }
 
     /*
-    Used to ignore AudioListener.pause, a method which pauses all AudioSources. Useful
-    to keep some audios playing when a pause screen is triggered, for example.
+    Used to ignore AudioListener.pause, a method that pauses all AudioSources. Useful to
+    keep some audios playing when a pause screen is triggered, for example.
     */
     public void IgnoreListenerPause(bool value)
     {

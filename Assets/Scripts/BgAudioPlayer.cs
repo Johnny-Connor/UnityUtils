@@ -19,12 +19,12 @@ public class BgAudioPlayer : MonoBehaviour
     private bool _isOriginalAudioSourceBeingUsed = true; /* False when the other AudioSource
     is being used. */
     private float _maxVolumeSetBeforeTransition; /* How high the volume of the fading in
-    AudioSource will be by the end of the .Play function. Must update this value whenever
+    AudioSource will be by the end of the Play function. Must update this value whenever
     the volume of an AudioSource is altered */
 
     // Other variables.
     private int _requestedAudioClipIndex = -1; /* AudioClip requested to be played in the
-    current instance of the .Play function. Negative values represent silence. */
+    current instance of the Play function. Negative values represent silence. */
     #endregion Variables
 
     #region MonoBehaviour Functions/Methods
@@ -161,9 +161,9 @@ public class BgAudioPlayer : MonoBehaviour
                     InUseAudioSource.volume = 0;
 
                     /*
-                    .Pause is used to prevent the TimeSamples of the AudioSources from 
+                    Pause is used to prevent the TimeSamples of the AudioSources from 
                     resetting (this would make 
-                    .SaveTimeSamplesFromPreviouslyRequestedAudioClip not work).
+                    SaveTimeSamplesFromPreviouslyRequestedAudioClip not work).
                     */
                     InUseAudioSource.Pause();
                     NotInUseAudioSource.Stop();
@@ -208,7 +208,7 @@ public class BgAudioPlayer : MonoBehaviour
     }
 
     /*
-    Used to ignore AudioListener.pause, a method which pauses all AudioSources. Useful to
+    Used to ignore AudioListener.pause, a method that pauses all AudioSources. Useful to
     keep some audios playing when a pause screen is triggered, for example.
     */
     public void IgnoreListenerPause(bool isIgnoringListenerPause)
