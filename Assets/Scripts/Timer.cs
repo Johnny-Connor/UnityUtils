@@ -1,40 +1,50 @@
 using System;
 using UnityEngine;
 
-public class Timer : MonoBehaviour
+public class Timer
 {
+    // Variables.
     private Action _timerCallback;
-    private float _timeLeft;
 
-    private void Update()
+    private bool _isTimerRunning;
+    public bool IsTimerRunning { get => _isTimerRunning; }
+
+    private float _timeLeft;
+    public float TimeLeft { get => _timeLeft; }
+
+
+    // Constructor.
+    public Timer(Action timerCallback = null)
     {
-        void Countdown()
+        _timerCallback = timerCallback;
+    }
+
+
+    // Non-MonoBehaviour.
+    public void StartTimer(float countdownTime, bool canOverrideCurrentTimer = false)
+    {
+        if (_isTimerRunning && !canOverrideCurrentTimer)
         {
-            if (_timeLeft > 0)
-            {
-                _timeLeft -= Time.deltaTime;
-                if (_timeLeft <= 0)
-                {
-                    _timerCallback();
-                }
-            }
+            Debug.LogWarning("Cannot override timer because 'canOverrideCurrentTimer' is set to false.");
+            return;
         }
 
-        Countdown();
+        _timeLeft = countdownTime;
+        _isTimerRunning = true;
     }
 
-    public float GetTimeLeft()
+    public void UpdateTimer()
     {
-        return _timeLeft;
-    }
+        if (_isTimerRunning)
+        {
+            _timeLeft -= Time.deltaTime;
 
-    /*
-    Sets a new value for the timer and receives a callback method to use when the timer
-    reaches 0 in the Countdown() method.
-    */
-    public void SetTimer(float timerDuration, Action callbackMethod)
-    {
-        _timeLeft = timerDuration;
-        _timerCallback = callbackMethod;
+            if (_timeLeft <= 0)
+            {
+                _isTimerRunning = false;
+                _timeLeft = 0;
+                _timerCallback();
+            }
+        }
     }
 }
