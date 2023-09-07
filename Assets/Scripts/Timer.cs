@@ -13,7 +13,7 @@ public class Timer
     // Constructor.
     public Timer(Action timerCallback = null)
     {
-        _timerCallback = timerCallback;
+        _timerCallback = timerCallback ?? (() => { /* Default action, do nothing. */ });
     }
 
 
