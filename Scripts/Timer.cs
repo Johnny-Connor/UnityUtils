@@ -11,10 +11,8 @@ public class Timer
 
 
     // Constructor.
-    public Timer(Action timerCallback = null)
-    {
+    public Timer(Action timerCallback = null) => 
         _timerCallback = timerCallback ?? (() => { /* Default action, do nothing. */ });
-    }
 
 
     // Non-MonoBehaviour.
@@ -31,15 +29,12 @@ public class Timer
 
     public void UpdateTimer()
     {
-        if (_timeLeft > 0)
-        {
-            _timeLeft -= Time.deltaTime;
+        _timeLeft -= Time.deltaTime;
 
-            if (_timeLeft <= 0)
-            {
-                _timeLeft = 0;
-                _timerCallback();
-            }
+        if (_timeLeft <= 0)
+        {
+            _timeLeft = 0;
+            _timerCallback();
         }
     }
 }
