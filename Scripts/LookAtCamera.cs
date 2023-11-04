@@ -23,11 +23,11 @@ public class LookAtCamera : MonoBehaviour
         else
         {
             /*
-            The use of the "transform.LookAt(_cameraTransform)" command without inversion
-            will result in a mirrored appearance of the elements due to the fact that the UI
-            element will be facing the camera, which is facing the UI. This phenomenon can be
-            observed in practice when, for example, one looks at an individual's face: their
-            left eye will appear as their right eye, and vice versa. 
+            The use of the "transform.LookAt(_cameraTransform)" command without inversion will result in a 
+            mirrored appearance of the elements due to the fact that the UI element will be facing the 
+            camera, which is facing the UI. This phenomenon can be observed in practice when, for example, 
+            one looks at an individual's face: their left eye will appear as their right eye, and vice 
+            versa. 
             */
             transform.LookAt(_cameraTransform);
         }

@@ -7,7 +7,7 @@ public class Timer
     private Action _timerCallback;
     
     private float _timeLeft;
-    public float TimeLeft { get => _timeLeft; }
+    public float TimeLeft => _timeLeft;
 
 
     // Constructor.
