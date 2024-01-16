@@ -4,12 +4,15 @@ using UnityEngine;
 public class Timer
 {
     // Variables.
-    private Action _timerCallback;
+    private readonly Action _timerCallback;
+    private bool _callbackInvoked;
+    
+    // Properties.
     public float TimeLeft { get; private set; }
 
 
     // Constructor.
-    public Timer(Action timerCallback = null) => 
+    public Timer(Action timerCallback = null) =>
         _timerCallback = timerCallback ?? (() => { /* Default action, do nothing. */ })
     ;
 
@@ -24,16 +27,17 @@ public class Timer
         }
 
         TimeLeft = countdownTime;
+        _callbackInvoked = false;
     }
 
     public void UpdateTimer()
     {
-        TimeLeft -= Time.deltaTime;
-
-        if (TimeLeft <= 0)
+        if (TimeLeft > 0) TimeLeft -= Time.deltaTime;
+        else if (!_callbackInvoked)
         {
             TimeLeft = 0;
-            _timerCallback();
+            _timerCallback?.Invoke();
+            _callbackInvoked = true;
         }
     }
 }
