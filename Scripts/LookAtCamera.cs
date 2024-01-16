@@ -1,7 +1,6 @@
-// Useful for canvases that use the 'World Space' render mode.
-
 using UnityEngine;
 
+// Useful for canvases that use the 'World Space' render mode.
 public class LookAtCamera : MonoBehaviour
 {
     // Variables.

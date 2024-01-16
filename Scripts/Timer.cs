@@ -5,35 +5,34 @@ public class Timer
 {
     // Variables.
     private Action _timerCallback;
-    
-    private float _timeLeft;
-    public float TimeLeft => _timeLeft;
+    public float TimeLeft { get; private set; }
 
 
     // Constructor.
     public Timer(Action timerCallback = null) => 
-        _timerCallback = timerCallback ?? (() => { /* Default action, do nothing. */ });
+        _timerCallback = timerCallback ?? (() => { /* Default action, do nothing. */ })
+    ;
 
 
     // Non-MonoBehaviour.
     public void StartTimer(float countdownTime, bool canOverrideCurrentTimer = false)
     {
-        if (_timeLeft > 0 && !canOverrideCurrentTimer)
+        if (TimeLeft > 0 && !canOverrideCurrentTimer)
         {
             Debug.LogWarning("Cannot override timer because 'canOverrideCurrentTimer' is set to false.");
             return;
         }
 
-        _timeLeft = countdownTime;
+        TimeLeft = countdownTime;
     }
 
     public void UpdateTimer()
     {
-        _timeLeft -= Time.deltaTime;
+        TimeLeft -= Time.deltaTime;
 
-        if (_timeLeft <= 0)
+        if (TimeLeft <= 0)
         {
-            _timeLeft = 0;
+            TimeLeft = 0;
             _timerCallback();
         }
     }

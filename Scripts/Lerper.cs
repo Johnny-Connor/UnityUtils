@@ -1,12 +1,11 @@
+using System;
+using UnityEngine;
+
 /*
 A class that uses Mathf.Lerp the way it was intended to be used, guaranteeing a value transition over a
 given time without slowing down exponentialy as it approaches the end, as often seen in many
 implementations.
 */
-
-using System;
-using UnityEngine;
-
 public class Lerper
 {
     // Variables.
