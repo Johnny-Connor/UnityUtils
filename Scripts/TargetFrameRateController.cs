@@ -2,9 +2,12 @@ using UnityEngine;
 
 public class TargetFrameRateController : MonoBehaviour
 {
+    // Variables.
     [SerializeField] private int _targetFrameRate = -1;
     private int _previousTargetFrameRateValue;
 
+
+    // MonoBehaviour.
     private void Awake()
     {
         QualitySettings.vSyncCount = 0; // If vSyncCount != 0, targetFrameRate is ignored.

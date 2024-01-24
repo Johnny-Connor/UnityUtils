@@ -7,6 +7,7 @@ public class Timer
     private readonly Action _timerCallback;
     private bool _callbackInvoked;
     
+    
     // Properties.
     public float TimeLeft { get; private set; }
 
