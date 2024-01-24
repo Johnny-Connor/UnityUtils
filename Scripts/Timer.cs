@@ -5,7 +5,7 @@ public class Timer
 {
     // Variables.
     private readonly Action _timerCallback;
-    private bool _callbackInvoked;
+    private bool _timerCallbackInvoked;
     
     
     // Properties.
@@ -19,26 +19,28 @@ public class Timer
 
 
     // Non-MonoBehaviour.
-    public void StartTimer(float countdownTime, bool canOverrideCurrentTimer = false)
+    public void SetTimeLeft(float newTimeLeft, bool canOverrideOngoingTimeLeft = false)
     {
-        if (TimeLeft > 0 && !canOverrideCurrentTimer)
+        if (TimeLeft > 0 && !canOverrideOngoingTimeLeft)
         {
-            Debug.LogWarning("Cannot override timer because 'canOverrideCurrentTimer' is set to false.");
+            Debug.LogWarning(
+                $"Cannot override time because {nameof(canOverrideOngoingTimeLeft)} was set to false."
+            );
             return;
         }
 
-        TimeLeft = countdownTime;
-        _callbackInvoked = false;
+        TimeLeft = newTimeLeft;
+        _timerCallbackInvoked = false;
     }
 
-    public void UpdateTimer()
+    public void Update()
     {
         if (TimeLeft > 0) TimeLeft -= Time.deltaTime;
-        else if (!_callbackInvoked)
+        else if (!_timerCallbackInvoked)
         {
             TimeLeft = 0;
             _timerCallback?.Invoke();
-            _callbackInvoked = true;
+            _timerCallbackInvoked = true;
         }
     }
 }
