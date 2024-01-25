@@ -20,7 +20,7 @@ public class CursorController : MonoBehaviour
 
     [Tooltip("If enabled, the cursor's visibility will not be updated when switching between mouse " +
     "and keyboard devices.")]
-    [SerializeField] private bool _treatMouseAndKeyboardAsSameDevice = true;
+    [SerializeField] private bool _treatMouseAndKeyboardAsSameDevice;
 
     private InputDevice _lastInputDevice;
 
@@ -41,7 +41,11 @@ public class CursorController : MonoBehaviour
 
 
     // MonoBehaviour.
-    private void Awake() => InputSystem.onActionChange += InputSystem_OnActionChange;
+    private void Awake()
+    {
+        InputSystem.onActionChange += InputSystem_OnActionChange;
+        CursorState = _canCursorBeUsed;
+    }
 
 
     // Event Handlers.
@@ -60,7 +64,7 @@ public class CursorController : MonoBehaviour
             )
             {
                 if (CursorState) return;
-                CursorState = true;        
+                CursorState = true;
             }
             else
             {
