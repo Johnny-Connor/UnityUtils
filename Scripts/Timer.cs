@@ -24,7 +24,8 @@ public class Timer
         if (TimeLeft > 0 && !canOverrideOngoingTimeLeft)
         {
             Debug.LogWarning(
-                $"Cannot override time because {nameof(canOverrideOngoingTimeLeft)} was set to false."
+                $"Cannot override time because {nameof(canOverrideOngoingTimeLeft)} was set to false. " +
+                "Returning method."
             );
             return;
         }
