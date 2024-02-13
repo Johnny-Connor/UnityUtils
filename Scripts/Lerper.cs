@@ -27,11 +27,12 @@ public class Lerper
 
 
     // Non-MonoBehaviour.
-    public void StartLerper(bool canOverrideLerpCycle = false)
+    public void StartLerper(bool canOverrideOnGoingLerpCycle = false)
     {
-        if (_timeElapsed < _lerpDuration)
+        if (_timeElapsed < _lerpDuration && !canOverrideOnGoingLerpCycle)
         {
-            Debug.LogWarning("Cannot override Lerp cycle because 'canOverrideLerpCycle' is set to false.");
+            Debug.LogWarning("Cannot override Lerp cycle because 'canOverrideLerpCycle' was set to " + 
+            "false. Returning method.");
             return;
         }
 
