@@ -34,7 +34,7 @@ public class CursorController : MonoBehaviour
             Cursor.visible = value;
 
             foreach (GraphicRaycaster graphicRaycaster in _graphicRaycasters)
-                graphicRaycaster.enabled = value
+                if (graphicRaycaster != null) graphicRaycaster.enabled = value
             ;
         }
     }
