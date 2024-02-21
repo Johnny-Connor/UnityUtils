@@ -41,11 +41,9 @@ public class CursorController : MonoBehaviour
 
 
     // MonoBehaviour.
-    private void Awake()
-    {
-        InputSystem.onActionChange += InputSystem_OnActionChange;
-        CursorState = _canCursorBeUsed;
-    }
+    private void Awake() => CursorState = _canCursorBeUsed;
+    private void OnEnable() => InputSystem.onActionChange += InputSystem_OnActionChange;
+    private void OnDisable() => InputSystem.onActionChange -= InputSystem_OnActionChange;
 
 
     // Event Handlers.
