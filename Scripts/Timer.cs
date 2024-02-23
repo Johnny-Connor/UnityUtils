@@ -5,7 +5,7 @@ public class Timer
 {
     // Variables.
     private readonly Action _timerCallback;
-    private bool _timerCallbackInvoked;
+    private bool _timerCallbackInvoked = true;
     
     
     // Properties.
