@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
 [RequireComponent(typeof(TMPro.TextMeshProUGUI))]
-// Auto-updates TextMeshProUGUI's size as it changes during runtime.
+// Auto-updates TextMeshProUGUI's size as it changes during runtime. Does not work with 'stretch' anchors.
 public class TextMeshProUGUIAutoSizer : MonoBehaviour
 {
     // Variables.
