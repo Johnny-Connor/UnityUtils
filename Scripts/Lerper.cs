@@ -9,10 +9,10 @@ implementations.
 public class Lerper
 {
     // Variables.
+    private Action _lerperCallback;
     private float _initialValue;
     private float _endValue;
     private float _lerpDuration;
-    private Action _lerperCallback;
     private float _timeElapsed = Mathf.Infinity;
 
 

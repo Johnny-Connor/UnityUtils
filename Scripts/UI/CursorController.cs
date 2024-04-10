@@ -57,7 +57,9 @@ public class CursorController : MonoBehaviour
         {
             _lastInputDevice = newDevice;
 
-            if (newDevice.displayName == "Mouse" ||
+            if
+            (
+                newDevice.displayName == "Mouse" ||
                 (newDevice.displayName == "Keyboard" && _treatMouseAndKeyboardAsSameDevice)
             )
             {
