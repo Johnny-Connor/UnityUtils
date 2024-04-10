@@ -18,7 +18,7 @@ public class Timer
     ;
 
 
-    // Non-MonoBehaviour.
+    // Methods.
     public void SetTimeLeft(float newTimeLeft, bool canOverrideOngoingTimeLeft = false)
     {
         if (TimeLeft > 0 && !canOverrideOngoingTimeLeft)

@@ -26,7 +26,7 @@ public class Lerper
     }
 
 
-    // Non-MonoBehaviour.
+    // Methods.
     public void StartLerper(bool canOverrideOnGoingLerpCycle = false)
     {
         if (_timeElapsed < _lerpDuration && !canOverrideOnGoingLerpCycle)

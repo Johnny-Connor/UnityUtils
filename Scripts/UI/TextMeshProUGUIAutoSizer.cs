@@ -14,7 +14,7 @@ public class TextMeshProUGUIAutoSizer : MonoBehaviour
     private bool _belongsToALayoutGroup;
 
 
-    // MonoBehaviour.
+    // MonoBehaviour Methods.
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -25,7 +25,7 @@ public class TextMeshProUGUIAutoSizer : MonoBehaviour
     private void Update() => SetSize();
 
 
-    // Non-MonoBehaviour.
+    // Methods.
     private void SetSize()
     {
         if (_currentPreferredWidth != _tmProUGUI.preferredWidth || 

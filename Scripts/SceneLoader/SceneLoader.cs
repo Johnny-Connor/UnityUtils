@@ -18,7 +18,7 @@ public static class SceneLoader
     private static Scene _loadingSceneTargetScene;
 
 
-    // Non-MonoBehaviour.
+    // Methods.
     public static void Load(Scene newTargetScene)
     {
         _loadingSceneTargetScene = newTargetScene;

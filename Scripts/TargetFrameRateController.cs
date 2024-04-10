@@ -7,7 +7,7 @@ public class TargetFrameRateController : MonoBehaviour
     private int _previousTargetFrameRateValue;
 
 
-    // MonoBehaviour.
+    // MonoBehaviour Methods.
     private void Awake()
     {
         QualitySettings.vSyncCount = 0; // If vSyncCount != 0, targetFrameRate is ignored.

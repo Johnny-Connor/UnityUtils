@@ -8,7 +8,7 @@ public class LookAtCamera : MonoBehaviour
     private Transform _cameraTransform;
 
 
-    // MonoBehaviour.
+    // MonoBehaviour Methods.
     private void Awake() => _cameraTransform = Camera.main.transform;
 
     // Ensures that the rotation will only update after the camera moves, that is, after Update.
