@@ -56,9 +56,7 @@ public class UnfocusableInteractable :
         _interactableImage.color = firstColor;
     }
 
-    #if UNITY_EDITOR
     private void OnValidate() => Awake();
-    #endif
 
 
     // Interface Methods.
