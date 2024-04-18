@@ -29,9 +29,11 @@ public static class LayoutGroupRefreshProblemSolver
 
         LayoutGroup[] layoutGroupsInRootChildren = rootLayoutGroup.GetComponentsInChildren<LayoutGroup>();
 
-        foreach (LayoutGroup layoutGroup in layoutGroupsInRootChildren)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(layoutGroup.GetComponent<RectTransform>())
-        ;
+        for (int i = layoutGroupsInRootChildren.Length - 1; i >= 0; i--)
+        {
+            LayoutGroup layoutGroup = layoutGroupsInRootChildren[i];
+            LayoutRebuilder.ForceRebuildLayoutImmediate(layoutGroup.GetComponent<RectTransform>());
+        }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(rootLayoutGroup.GetComponent<RectTransform>());
     }
