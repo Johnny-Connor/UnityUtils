@@ -5,7 +5,7 @@ public class Timer
 {
     // Variables.
     private readonly Action _timerCallback;
-    private bool _timerCallbackInvoked = true;
+    private bool _cycleEnded = true;
 
 
     // Properties.
@@ -31,17 +31,17 @@ public class Timer
         }
 
         TimeLeft = newTimeLeft;
-        _timerCallbackInvoked = false;
+        _cycleEnded = false;
     }
 
     public void Update()
     {
         if (TimeLeft > 0) TimeLeft -= Time.deltaTime;
-        else if (!_timerCallbackInvoked)
+        else if (!_cycleEnded)
         {
             TimeLeft = 0;
+            _cycleEnded = true;
             _timerCallback?.Invoke();
-            _timerCallbackInvoked = true;
         }
     }
 }
