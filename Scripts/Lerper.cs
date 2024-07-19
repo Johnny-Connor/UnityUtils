@@ -17,17 +17,15 @@ public class Lerper
 
 
     // Constructor.
-    public Lerper(float initialValue, float endValue, float lerpDuration, Action lerperCallback = null)
-    {
-        _initialValue = initialValue;
-        _endValue = endValue;
-        _lerpDuration = lerpDuration;
-        _lerperCallback = lerperCallback ?? (() => { /* Default action, do nothing. */ });
-    }
+    public Lerper(Action lerperCallback = null) =>
+        _lerperCallback = lerperCallback ?? (() => { /* Default action, do nothing. */ })
+    ;
 
 
     // Methods.
-    public void StartLerper(bool canOverrideOnGoingLerpCycle = false)
+    public void SetLerper(
+        float initialValue, float endValue, float lerpDuration, bool canOverrideOnGoingLerpCycle = false
+    )
     {
         if (_timeElapsed < _lerpDuration && !canOverrideOnGoingLerpCycle)
         {
@@ -36,10 +34,14 @@ public class Lerper
             return;
         }
 
+        _initialValue = initialValue;
+        _endValue = endValue;
+        _lerpDuration = lerpDuration;
+
         _timeElapsed = 0;
     }
 
-    public void UpdateLerper(ref float lerpValue)
+    public void Update(ref float lerpValue)
     {
         if (_timeElapsed < _lerpDuration)
         {
