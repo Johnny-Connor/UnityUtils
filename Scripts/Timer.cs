@@ -19,12 +19,12 @@ public class Timer
 
 
     // Methods.
-    public void SetTimeLeft(float newTimeLeft, bool canOverrideOngoingTimeLeft = false)
+    public void SetCycle(float newTimeLeft, bool canOverrideOngoingCycle = false)
     {
-        if (TimeLeft > 0 && !canOverrideOngoingTimeLeft)
+        if (TimeLeft > 0 && !canOverrideOngoingCycle)
         {
             Debug.LogWarning(
-                $"Cannot override time because {nameof(canOverrideOngoingTimeLeft)} was set to false. " +
+                $"Cannot override cycle because {nameof(canOverrideOngoingCycle)} was set to false. " +
                 "Returning method."
             );
             return;

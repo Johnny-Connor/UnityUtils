@@ -23,14 +23,16 @@ public class Lerper
 
 
     // Methods.
-    public void SetLerper(
-        float initialValue, float endValue, float lerpDuration, bool canOverrideOnGoingLerpCycle = false
+    public void SetCycle(
+        float initialValue, float endValue, float lerpDuration, bool canOverrideOngoingCycle = false
     )
     {
-        if (_timeElapsed < _lerpDuration && !canOverrideOnGoingLerpCycle)
+        if (_timeElapsed < _lerpDuration && !canOverrideOngoingCycle)
         {
-            Debug.LogWarning("Cannot override Lerp cycle because 'canOverrideLerpCycle' was set to " + 
-            "false. Returning method.");
+            Debug.LogWarning(
+                $"Cannot override cycle because {nameof(canOverrideOngoingCycle)} was set to false. " +
+                "Returning method."
+            );
             return;
         }
 
