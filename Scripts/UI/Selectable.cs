@@ -1,5 +1,5 @@
 /*
-A modified Selectable.cs.
+A customized Selectable.cs. Search for 'region' to find the modified segments.
 Features:
 - Navigation Alignment: ensures Selectables are aligned with the chosen navigation mode before they are
 considered navigable.
@@ -807,17 +807,17 @@ namespace UnityEngine.UI
                     continue;
 
                 #region Navigation Alignment
-                if (m_Navigation.mode == Navigation.Mode.Horizontal)
+                if (m_Navigation.mode == Navigation.Mode.Automatic)
+                {
+                    if (!CheckHorizontalIntersection(sel) && !CheckVerticalIntersection(sel)) continue;
+                }
+                else if (m_Navigation.mode == Navigation.Mode.Horizontal)
                 {
                     if (!CheckHorizontalIntersection(sel)) continue;
                 }
                 else if (m_Navigation.mode == Navigation.Mode.Vertical)
                 {
                     if (!CheckVerticalIntersection(sel)) continue;
-                }
-                else
-                {
-                    if (!CheckHorizontalIntersection(sel) && !CheckVerticalIntersection(sel)) continue;
                 }
                 #endregion Navigation Alignment
 
@@ -1417,17 +1417,17 @@ namespace UnityEngine.UI
         #region Gizmo Navigation Alignment Visualization
         private void OnDrawGizmos()
         {
-            if (m_Navigation.mode == Navigation.Mode.Horizontal)
+            if (m_Navigation.mode == Navigation.Mode.Automatic)
+            {
+                DrawHorizontalGizmos();
+                DrawVerticalGizmos();
+            }
+            else if (m_Navigation.mode == Navigation.Mode.Horizontal)
             {
                 DrawHorizontalGizmos();
             }
             else if (m_Navigation.mode == Navigation.Mode.Vertical)
             {
-                DrawVerticalGizmos();
-            }
-            else
-            {
-                DrawHorizontalGizmos();
                 DrawVerticalGizmos();
             }
         }
@@ -1437,32 +1437,75 @@ namespace UnityEngine.UI
             RectTransform currentRect = transform as RectTransform;
             if (currentRect == null) return;
 
-            float currentTop = currentRect.position.y + currentRect.rect.height / 2;
-            float currentBottom = currentRect.position.y - currentRect.rect.height / 2;
+            // Get world positions for the edges of the current RectTransform
+            Vector3 currentTopLeft = currentRect.TransformPoint(new Vector3(currentRect.rect.xMin, currentRect.rect.yMax, 0));
+            Vector3 currentTopRight = currentRect.TransformPoint(new Vector3(currentRect.rect.xMax, currentRect.rect.yMax, 0));
+            Vector3 currentBottomLeft = currentRect.TransformPoint(new Vector3(currentRect.rect.xMin, currentRect.rect.yMin, 0));
+            Vector3 currentBottomRight = currentRect.TransformPoint(new Vector3(currentRect.rect.xMax, currentRect.rect.yMin, 0));
 
-            // Define infinity as a large number for visualization
-            float infinity = 10000f;
             bool intersects = false;
+            Vector3 startPoint = Vector3.zero;
+            Vector3 endPoint = Vector3.zero;
 
             for (int i = 0; i < s_SelectableCount; ++i)
             {
                 Selectable sel = s_Selectables[i];
                 if (sel == this) continue;
 
-                // Check for intersection with other Selectables
-                if (CheckHorizontalIntersection(sel))
+                RectTransform selRect = sel.transform as RectTransform;
+                if (selRect == null) continue;
+
+                // Get world positions for the edges of the selectable's RectTransform
+                Vector3 selTopLeft = selRect.TransformPoint(new Vector3(selRect.rect.xMin, selRect.rect.yMax, 0));
+                Vector3 selTopRight = selRect.TransformPoint(new Vector3(selRect.rect.xMax, selRect.rect.yMax, 0));
+                Vector3 selBottomLeft = selRect.TransformPoint(new Vector3(selRect.rect.xMin, selRect.rect.yMin, 0));
+                Vector3 selBottomRight = selRect.TransformPoint(new Vector3(selRect.rect.xMax, selRect.rect.yMin, 0));
+
+                // Check for horizontal intersection
+                bool horizontalOverlap = selBottomLeft.y < currentTopLeft.y && selTopLeft.y > currentBottomLeft.y;
+
+                if (horizontalOverlap)
                 {
                     intersects = true;
-                    break; // We can stop early if we find an intersection
+
+                    // Find the closest edge of the current RectTransform to the intersecting selectable
+                    Vector3[] currentEdges = { currentTopLeft, currentTopRight, currentBottomLeft, currentBottomRight };
+                    Vector3[] selEdges = { selTopLeft, selTopRight, selBottomLeft, selBottomRight };
+
+                    float closestDistance = float.PositiveInfinity;
+
+                    foreach (var currentEdge in currentEdges)
+                    {
+                        foreach (var selEdge in selEdges)
+                        {
+                            float distance = Vector3.Distance(currentEdge, selEdge);
+                            if (distance < closestDistance)
+                            {
+                                closestDistance = distance;
+
+                                // Calculate midpoints based on the heights of the RectTransforms
+                                Vector3 currentCenter = currentRect.TransformPoint(new Vector3(currentRect.rect.center.x, 0, 0));
+                                Vector3 selCenter = selRect.TransformPoint(new Vector3(selRect.rect.center.x, 0, 0));
+
+                                // Determine which y position to use
+                                float currentMidPointY = currentCenter.y;
+                                float selMidPointY = selCenter.y;
+
+                                // Set start and end points to the midpoints
+                                startPoint = new Vector3(currentEdge.x, currentMidPointY, currentEdge.z);
+                                endPoint = new Vector3(selEdge.x, selMidPointY, selEdge.z);
+                            }
+                        }
+                    }
                 }
             }
 
-            // Set the Gizmo color based on the combined result
-            Gizmos.color = intersects ? Color.green : Color.red;
+            if (!intersects) return; // Exit if no intersections found
 
-            // Draw the top and bottom lines
-            Gizmos.DrawLine(new Vector3(-infinity, currentTop, 0), new Vector3(infinity, currentTop, 0));
-            Gizmos.DrawLine(new Vector3(-infinity, currentBottom, 0), new Vector3(infinity, currentBottom, 0));
+            Gizmos.color = Color.green;
+
+            // Draw a line from the closest edge of the current RectTransform to the intersecting selectable
+            Gizmos.DrawLine(startPoint, endPoint);
         }
 
         private void DrawVerticalGizmos()
@@ -1470,32 +1513,75 @@ namespace UnityEngine.UI
             RectTransform currentRect = transform as RectTransform;
             if (currentRect == null) return;
 
-            float currentRight = currentRect.position.x + currentRect.rect.width / 2;
-            float currentLeft = currentRect.position.x - currentRect.rect.width / 2;
+            // Get world positions for the left and right edges of the current RectTransform
+            Vector3 currentTopLeft = currentRect.TransformPoint(new Vector3(currentRect.rect.xMin, currentRect.rect.yMax, 0));
+            Vector3 currentTopRight = currentRect.TransformPoint(new Vector3(currentRect.rect.xMax, currentRect.rect.yMax, 0));
+            Vector3 currentBottomLeft = currentRect.TransformPoint(new Vector3(currentRect.rect.xMin, currentRect.rect.yMin, 0));
+            Vector3 currentBottomRight = currentRect.TransformPoint(new Vector3(currentRect.rect.xMax, currentRect.rect.yMin, 0));
 
-            // Define infinity as a large number for visualization
-            float infinity = 10000f;
             bool intersects = false;
+            Vector3 startPoint = Vector3.zero;
+            Vector3 endPoint = Vector3.zero;
 
             for (int i = 0; i < s_SelectableCount; ++i)
             {
                 Selectable sel = s_Selectables[i];
                 if (sel == this) continue;
 
-                // Check for intersection with other Selectables
-                if (CheckVerticalIntersection(sel))
+                RectTransform selRect = sel.transform as RectTransform;
+                if (selRect == null) continue;
+
+                // Get world positions for the left and right edges of the selectable's RectTransform
+                Vector3 selTopLeft = selRect.TransformPoint(new Vector3(selRect.rect.xMin, selRect.rect.yMax, 0));
+                Vector3 selTopRight = selRect.TransformPoint(new Vector3(selRect.rect.xMax, selRect.rect.yMax, 0));
+                Vector3 selBottomLeft = selRect.TransformPoint(new Vector3(selRect.rect.xMin, selRect.rect.yMin, 0));
+                Vector3 selBottomRight = selRect.TransformPoint(new Vector3(selRect.rect.xMax, selRect.rect.yMin, 0));
+
+                // Check for vertical intersection
+                bool verticalOverlap = selTopRight.x > currentTopLeft.x && selTopLeft.x < currentTopRight.x;
+
+                if (verticalOverlap)
                 {
                     intersects = true;
-                    break; // We can stop early if we find an intersection
+
+                    // Find the closest edge of the current RectTransform to the intersecting selectable
+                    Vector3[] currentEdges = { currentTopLeft, currentTopRight, currentBottomLeft, currentBottomRight };
+                    Vector3[] selEdges = { selTopLeft, selTopRight, selBottomLeft, selBottomRight };
+
+                    float closestDistance = float.PositiveInfinity;
+
+                    foreach (var currentEdge in currentEdges)
+                    {
+                        foreach (var selEdge in selEdges)
+                        {
+                            float distance = Vector3.Distance(currentEdge, selEdge);
+                            if (distance < closestDistance)
+                            {
+                                closestDistance = distance;
+
+                                // Calculate midpoints based on the heights of the RectTransforms
+                                Vector3 currentCenter = currentRect.TransformPoint(new Vector3(currentRect.rect.center.y, 0, 0));
+                                Vector3 selCenter = selRect.TransformPoint(new Vector3(selRect.rect.center.y, 0, 0));
+
+                                // Determine which x position to use
+                                float currentMidPointX = currentCenter.x;
+                                float selMidPointX = selCenter.x;
+
+                                // Set start and end points to the midpoints
+                                startPoint = new Vector3(currentMidPointX, currentEdge.y, currentEdge.z);
+                                endPoint = new Vector3(selMidPointX, selEdge.y, selEdge.z);
+                            }
+                        }
+                    }
                 }
             }
 
-            // Set the Gizmo color based on the combined result
-            Gizmos.color = intersects ? Color.green : Color.red;
+            if (!intersects) return; // Exit if no intersections found
 
-            // Draw the right and left lines
-            Gizmos.DrawLine(new Vector3(currentRight, -infinity, 0), new Vector3(currentRight, infinity, 0));
-            Gizmos.DrawLine(new Vector3(currentLeft, -infinity, 0), new Vector3(currentLeft, infinity, 0));
+            Gizmos.color = Color.green;
+
+            // Draw a line from the closest edge of the current RectTransform to the intersecting selectable
+            Gizmos.DrawLine(startPoint, endPoint);
         }
 
         private bool CheckHorizontalIntersection(Selectable sel)
@@ -1506,13 +1592,15 @@ namespace UnityEngine.UI
             RectTransform currentRect = transform as RectTransform;
             if (currentRect == null) return false;
 
-            float selTop = selRect.position.y + selRect.rect.height / 2;
-            float selBottom = selRect.position.y - selRect.rect.height / 2;
-            float currentTop = currentRect.position.y + currentRect.rect.height / 2;
-            float currentBottom = currentRect.position.y - currentRect.rect.height / 2;
+            Vector3 selTopLeft = selRect.TransformPoint(new Vector3(selRect.rect.xMin, selRect.rect.yMax, 0));
+            Vector3 selBottomLeft = selRect.TransformPoint(new Vector3(selRect.rect.xMin, selRect.rect.yMin, 0));
+
+            Vector3 currentTopLeft = currentRect.TransformPoint(new Vector3(currentRect.rect.xMin, currentRect.rect.yMax, 0));
+            Vector3 currentBottomLeft = currentRect.TransformPoint(new Vector3(currentRect.rect.xMin, currentRect.rect.yMin, 0));
 
             // Check if there is a vertical overlap or containment
-            return (selTop <= currentTop && selBottom >= currentBottom) || (selTop >= currentTop && selBottom <= currentBottom);
+            return (selTopLeft.y <= currentTopLeft.y && selBottomLeft.y >= currentBottomLeft.y) || 
+                (selTopLeft.y >= currentTopLeft.y && selBottomLeft.y <= currentBottomLeft.y);
         }
 
         private bool CheckVerticalIntersection(Selectable sel)
@@ -1523,13 +1611,15 @@ namespace UnityEngine.UI
             RectTransform currentRect = transform as RectTransform;
             if (currentRect == null) return false;
 
-            float selRight = selRect.position.x + selRect.rect.width / 2;
-            float selLeft = selRect.position.x - selRect.rect.width / 2;
-            float currentRight = currentRect.position.x + currentRect.rect.width / 2;
-            float currentLeft = currentRect.position.x - currentRect.rect.width / 2;
+            Vector3 selTopLeft = selRect.TransformPoint(new Vector3(selRect.rect.xMin, selRect.rect.yMax, 0));
+            Vector3 selTopRight = selRect.TransformPoint(new Vector3(selRect.rect.xMax, selRect.rect.yMax, 0));
+
+            Vector3 currentTopLeft = currentRect.TransformPoint(new Vector3(currentRect.rect.xMin, currentRect.rect.yMax, 0));
+            Vector3 currentTopRight = currentRect.TransformPoint(new Vector3(currentRect.rect.xMax, currentRect.rect.yMax, 0));
 
             // Check if there is a horizontal overlap or containment
-            return (selRight <= currentRight && selLeft >= currentLeft) || (selRight >= currentRight && selLeft <= currentLeft);
+            return (selTopRight.x <= currentTopRight.x && selTopLeft.x >= currentTopLeft.x) || 
+                (selTopRight.x >= currentTopRight.x && selTopLeft.x <= currentTopLeft.x);
         }
         #endregion Gizmo Navigation Alignment Visualization
     }
