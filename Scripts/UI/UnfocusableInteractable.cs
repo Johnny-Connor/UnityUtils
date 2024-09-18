@@ -3,13 +3,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Image))]
 /*
 An interactable that does not take the focus from a selected Selectable upon interaction.
 Note: If the GameObject containing this script has any other script with the ISelectHandler interface in it, 
 the EventSystem will clear the selection whenever this interactable is clicked.
 */
-public class UnfocusableInteractable :
+public class UnfocusableInteractable:
     MonoBehaviour,
     IPointerClickHandler,
     IPointerDownHandler,
@@ -19,18 +18,28 @@ public class UnfocusableInteractable :
 {
     // Variables.
     [SerializeField] private bool _interactable = true;
+    [SerializeField] private Graphic _targetGraphic;
     [SerializeField] private ColorBlock _colorBlock = ColorBlock.defaultColorBlock;
-    private Image _interactableImage;
 
 
     // Properties.
+    public ColorBlock ColorBlock
+    { 
+        get => _colorBlock; 
+        set 
+        {
+            _colorBlock = value;
+            UpdateGraphicColor();
+        }
+    }
+
     public bool Interactable
     {
         get => _interactable;
         set
         {
             _interactable = value;
-            _interactableImage.color = _interactable ? _colorBlock.normalColor : _colorBlock.disabledColor;
+            UpdateGraphicColor();
         }
     }
 
@@ -50,13 +59,19 @@ public class UnfocusableInteractable :
             Debug.LogError($"Do not attach {nameof(Selectable)}s to {nameof(UnfocusableInteractable)}s.")
         ;
 
-        if (!_interactableImage) _interactableImage = GetComponent<Image>();
-
-        Color firstColor = _interactable ? _colorBlock.normalColor : _colorBlock.disabledColor;
-        _interactableImage.color = firstColor;
+        UpdateGraphicColor();
     }
 
-    private void OnValidate() => Awake();
+    private void OnValidate() => UpdateGraphicColor();
+
+
+    // Methods.
+    private void UpdateGraphicColor()
+    {
+        if (_targetGraphic)
+            _targetGraphic.color = _interactable ? _colorBlock.normalColor : _colorBlock.disabledColor
+        ;
+    }
 
 
     // Interface Methods.
@@ -69,7 +84,7 @@ public class UnfocusableInteractable :
     {
         if (!Interactable) return;
 
-        _interactableImage.color = _colorBlock.pressedColor;
+        if (_targetGraphic) _targetGraphic.color = _colorBlock.pressedColor;
 
         OnPointerDowned?.Invoke(this, EventArgs.Empty);
     }
@@ -78,7 +93,7 @@ public class UnfocusableInteractable :
     {
         if (!Interactable) return;
 
-        _interactableImage.color = _colorBlock.highlightedColor;
+        if (_targetGraphic) _targetGraphic.color = _colorBlock.highlightedColor;
 
         OnPointerEntered?.Invoke(this, EventArgs.Empty);
     }
@@ -87,7 +102,7 @@ public class UnfocusableInteractable :
     {
         if (!Interactable) return;
 
-        _interactableImage.color = _colorBlock.normalColor;
+        if (_targetGraphic) _targetGraphic.color = _colorBlock.normalColor;
 
         OnPointerExited?.Invoke(this, EventArgs.Empty);
     }
@@ -96,7 +111,7 @@ public class UnfocusableInteractable :
     {
         if (!Interactable) return;
 
-        _interactableImage.color = _colorBlock.selectedColor;
+        if (_targetGraphic) _targetGraphic.color = _colorBlock.selectedColor;
 
         OnPointerUped?.Invoke(this, EventArgs.Empty);
     }
