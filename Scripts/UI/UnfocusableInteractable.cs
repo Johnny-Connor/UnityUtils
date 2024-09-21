@@ -108,7 +108,7 @@ public class UnfocusableInteractable:
     public void OnPointerUp(PointerEventData eventData)
     {
         if (!Interactable) return;
-        StartColorTween(_colorBlock.selectedColor);
+        StartColorTween(_colorBlock.normalColor);
         OnPointerUped?.Invoke(this, EventArgs.Empty);
     }
 }
