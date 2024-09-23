@@ -1408,7 +1408,7 @@ namespace UnityEngine.UI
             EventSystem.current.SetSelectedGameObject(gameObject);
         }
 
-        #region Gizmo Navigation Alignment Visualization
+        #region Navigation Alignment
         private bool CheckHorizontalIntersection(Selectable sel)
         {
             if (sel == null) return false;
@@ -1450,6 +1450,6 @@ namespace UnityEngine.UI
             // Check if there is a horizontal overlap or containment
             return selRight.x > currentLeft.x && selLeft.x < currentRight.x;
         }
-        #endregion Gizmo Navigation Alignment Visualization
+        #endregion Navigation Alignment
     }
 }
