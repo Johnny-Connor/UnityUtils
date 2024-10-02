@@ -1,5 +1,5 @@
 /*
-A customized Selectable.cs. Search for 'region' to find modified segments.
+A customized Selectable.cs. Search for 'region' to locate the modified segments.
 Features:
 - Navigation Alignment: Selectables must intersect with the navigation mode (Horizontal, Vertical) to be 
 navigable.
