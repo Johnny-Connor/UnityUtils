@@ -1,11 +1,20 @@
 /*
-A customized Selectable.cs. Search for 'region' to locate the modified segments.
+An extensive Selectable.cs edit. Search for '#region' to locate the modified segments.
 Features:
-- Navigation Alignment: Selectables must intersect with the navigation mode (Horizontal, Vertical) to be 
-navigable.
+- Navigation Alignment: Selectables must intersect with their navigation mode (Horizontal, Vertical) to 
+be navigable.
+- OnMove Toggle: Enables control over input movement for each instance.
+- Quality of Life Events: Provide insights into the state of each instance.
+- Select On Hover: Selects on pointer enter, bypassing the highlighted state.
+- Selection Fallback System: Automatically selects an available selectable when the current one becomes 
+non-interactable or disabled.
 */
 using System;
 using System.Collections.Generic;
+#region Selection Fallback System
+using System.Linq;
+using System.Threading.Tasks;
+#endregion Selection Fallback System
 using UnityEngine.Serialization;
 using UnityEngine.EventSystems;
 
@@ -24,6 +33,9 @@ namespace UnityEngine.UI
         IMoveHandler,
         IPointerDownHandler, IPointerUpHandler,
         IPointerEnterHandler, IPointerExitHandler,
+        #region Quality of Life Events
+        IPointerClickHandler, ISubmitHandler,
+        #endregion Quality of Life Events
         ISelectHandler, IDeselectHandler
     {
         protected static Selectable[] s_Selectables = new Selectable[10];
@@ -371,7 +383,10 @@ namespace UnityEngine.UI
                 if (SetPropertyUtility.SetStruct(ref m_Interactable, value))
                 {
                     if (!m_Interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
-                        EventSystem.current.SetSelectedGameObject(null);
+                    #region Selection Fallback System
+                        TrySelectFallbackSelectable();
+                        // EventSystem.current.SetSelectedGameObject(null);
+                    #endregion Selection Fallback System
                     OnSetProperty();
                 }
             }
@@ -423,6 +438,33 @@ namespace UnityEngine.UI
             get { return GetComponent<Animator>(); }
         }
 #endif
+
+        #region Selection Fallback System
+        private static Transform _lastInteractedRoot;
+        private static int _lastValidSelectedIndex;
+        private Selectable[] AllSelectablesInHierarchy
+        {
+            get
+            {
+                if (this != null) return transform.root.GetComponentsInChildren<Selectable>(true);
+                else if (_lastInteractedRoot != null) 
+                    return _lastInteractedRoot.GetComponentsInChildren<Selectable>(true)
+                ;
+                else return null;
+            }
+        }
+        private bool IsValid => IsActive() && interactable;
+        #endregion Selection Fallback System
+
+        #region Select On Hover
+        private static readonly bool _selectOnHover = true;
+        #endregion Select On Hover
+
+        #region Quality of Life Events
+        public event EventHandler OnConfirmed;
+        public event EventHandler OnDeselected;
+        public event EventHandler OnSelected;
+        #endregion Quality of Life Events
 
         protected override void Awake()
         {
@@ -555,6 +597,25 @@ namespace UnityEngine.UI
             if (!m_EnableCalled)
                 return;
 
+            #region Selection Fallback System
+            if (EventSystem.current && EventSystem.current.currentSelectedGameObject == gameObject)
+            {
+                _lastInteractedRoot = transform.root;
+                _lastValidSelectedIndex = AllSelectablesInHierarchy.ToList().IndexOf(this);
+                WaitForPotentialReselectionBeforeFallbackSearch();
+            }
+
+            // Useful to avoid overwriting selections made by a screen transition system.
+            async void WaitForPotentialReselectionBeforeFallbackSearch()
+            {
+                await Task.Yield();
+
+                if (!EventSystem.current) return;
+                GameObject selectedObject = EventSystem.current.currentSelectedGameObject;
+                if (!selectedObject || selectedObject == gameObject) TrySelectFallbackSelectable();
+            }
+            #endregion Selection Fallback System
+
             s_SelectableCount--;
 
             // Update the last elements index to be this index
@@ -580,6 +641,55 @@ namespace UnityEngine.UI
             }
         }
 
+        #region Selection Fallback System
+        /// <summary>
+        /// Attempts to select the closest selectable based on the index of the invalidated one in the 
+        /// <see cref="AllSelectablesInHierarchy"/>, which uses transform.root to organize selectables in 
+        /// hierarchical order. If no valid selectables are found in that property, the method attempts to
+        /// select the first element in the <see cref="allSelectablesArray"/> instead.
+        /// </summary>
+        private void TrySelectFallbackSelectable()
+        {
+            Selectable[] searchList = AllSelectablesInHierarchy;
+
+            if (searchList.Length == 1)
+            {
+                EventSystem.current.SetSelectedGameObject(searchList[0].gameObject);
+                return;
+            }
+            else // Search for closest selectable.
+            {
+                int currentIndex = 
+                    searchList.ToList().IndexOf(this) is var i && i != -1 ? i : _lastValidSelectedIndex
+                ;
+
+                for (int indexOffset = 1; indexOffset < searchList.Length; indexOffset++)
+                {
+                    if (currentIndex - indexOffset >= 0 && currentIndex + indexOffset < searchList.Length)
+                    {
+                        Selectable backwardCandidate = searchList[currentIndex - indexOffset];
+                        if (backwardCandidate.IsValid)
+                        {
+                            EventSystem.current.SetSelectedGameObject(backwardCandidate.gameObject);
+                            return;
+                        }
+
+                        Selectable forwardCandidate = searchList[currentIndex + indexOffset];
+                        if (forwardCandidate.IsValid)
+                        {
+                            EventSystem.current.SetSelectedGameObject(forwardCandidate.gameObject);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if (allSelectablesArray.Length > 0)
+                EventSystem.current.SetSelectedGameObject(allSelectablesArray[0].gameObject)
+            ;
+        }
+        #endregion Selection Fallback System
+
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -592,7 +702,11 @@ namespace UnityEngine.UI
             if (isActiveAndEnabled)
             {
                 if (!interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
-                    EventSystem.current.SetSelectedGameObject(null);
+                #region Selection Fallback System
+                    TrySelectFallbackSelectable();
+                    // EventSystem.current.SetSelectedGameObject(null);
+                #endregion Selection Fallback System
+                    
                 // Need to clear out the override image on the target...
                 DoSpriteSwap(null);
 
@@ -1077,8 +1191,18 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        #region OnMove Toggle
+        private bool _onMoveActionEnabled = true;
+        public bool EnableOnMoveAction() => _onMoveActionEnabled = true;
+        public bool DisableOnMoveAction() => _onMoveActionEnabled = false;
+        #endregion OnMove Toggle
+
         public virtual void OnMove(AxisEventData eventData)
         {
+            #region OnMove Toggle
+            if (!_onMoveActionEnabled) return;
+            #endregion OnMove Toggle
+            
             switch (eventData.moveDir)
             {
                 case MoveDirection.Right:
@@ -1227,6 +1351,18 @@ namespace UnityEngine.UI
             EvaluateAndTransitionToSelectionState();
         }
 
+        #region Quality of Life Events
+        public virtual void OnPointerClick(PointerEventData eventData)
+        {
+            if (interactable) OnConfirmed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public virtual void OnSubmit(BaseEventData eventData)
+        {
+            if (interactable) OnConfirmed?.Invoke(this, EventArgs.Empty);
+        }
+        #endregion Quality of Life Events
+
         /// <summary>
         /// Evaluate eventData and transition to appropriate state.
         /// </summary>
@@ -1288,8 +1424,27 @@ namespace UnityEngine.UI
         /// </example>
         public virtual void OnPointerEnter(PointerEventData eventData)
         {
-            isPointerInside = true;
-            EvaluateAndTransitionToSelectionState();
+            #region Select On Hover
+            /// <summary>
+            /// 'Blocker' is a screen-sized gameObject generated by <see cref="Dropdown.CreateBlocker"/>
+            /// when opening a dropdown list.
+            /// </summary>
+            bool isBlocker = 
+                name == "Blocker" && TryGetComponent(out Canvas canvas) && canvas.sortingOrder == 29999
+            ;
+
+            if (_selectOnHover && interactable && !isBlocker) 
+                EventSystem.current.SetSelectedGameObject(gameObject)
+            ;
+            else
+            {
+                isPointerInside = true;
+                EvaluateAndTransitionToSelectionState();
+            }
+
+            // isPointerInside = true;
+            // EvaluateAndTransitionToSelectionState();
+            #endregion Select On Hover
         }
 
         /// <summary>
@@ -1346,6 +1501,10 @@ namespace UnityEngine.UI
         {
             hasSelection = true;
             EvaluateAndTransitionToSelectionState();
+
+            #region Quality of Life Events
+            OnSelected?.Invoke(this, EventArgs.Empty);
+            #endregion Quality of Life Events
         }
 
         /// <summary>
@@ -1373,6 +1532,10 @@ namespace UnityEngine.UI
         {
             hasSelection = false;
             EvaluateAndTransitionToSelectionState();
+
+            #region Quality of Life Events
+            OnDeselected?.Invoke(this, EventArgs.Empty);
+            #endregion Quality of Life Events
         }
 
         /// <summary>
@@ -1419,14 +1582,13 @@ namespace UnityEngine.UI
             RectTransform currentRect = transform as RectTransform;
             if (currentRect == null) return false;
 
-            // Get the y-axis world positions
             Vector3 selTop = selRect.TransformPoint(new Vector3(0, selRect.rect.yMax, 0));
             Vector3 selBottom = selRect.TransformPoint(new Vector3(0, selRect.rect.yMin, 0));
 
             Vector3 currentTop = currentRect.TransformPoint(new Vector3(0, currentRect.rect.yMax, 0));
             Vector3 currentBottom = currentRect.TransformPoint(new Vector3(0, currentRect.rect.yMin, 0));
 
-            // Check if there is a vertical overlap or containment
+            // Check if there is a vertical overlap or containment.
             return selBottom.y < currentTop.y && selTop.y > currentBottom.y;
         }
 
@@ -1440,14 +1602,13 @@ namespace UnityEngine.UI
             RectTransform currentRect = transform as RectTransform;
             if (currentRect == null) return false;
 
-            // Get the x-axis world positions
             Vector3 selLeft = selRect.TransformPoint(new Vector3(selRect.rect.xMin, 0, 0));
             Vector3 selRight = selRect.TransformPoint(new Vector3(selRect.rect.xMax, 0, 0));
 
             Vector3 currentLeft = currentRect.TransformPoint(new Vector3(currentRect.rect.xMin, 0, 0));
             Vector3 currentRight = currentRect.TransformPoint(new Vector3(currentRect.rect.xMax, 0, 0));
 
-            // Check if there is a horizontal overlap or containment
+            // Check if there is a horizontal overlap or containment.
             return selRight.x > currentLeft.x && selLeft.x < currentRight.x;
         }
         #endregion Navigation Alignment
