@@ -11,7 +11,6 @@ public class TextMeshProUGUIAutoSizer : MonoBehaviour
     private RectTransform rectTransform;
     private float _currentPreferredWidth;
     private float _currentPreferredHeight;
-    private bool _belongsToALayoutGroup;
 
 
     // MonoBehaviour Methods.
@@ -19,7 +18,6 @@ public class TextMeshProUGUIAutoSizer : MonoBehaviour
     {
         rectTransform = GetComponent<RectTransform>();
         _tmProUGUI = GetComponent<TMPro.TextMeshProUGUI>();
-        _belongsToALayoutGroup = GetComponentInParent<LayoutGroup>();
     }
     private void OnEnable() => SetSize();
     private void Update() => SetSize();
@@ -35,11 +33,7 @@ public class TextMeshProUGUIAutoSizer : MonoBehaviour
             if (_currentPreferredWidth != _tmProUGUI.preferredWidth) SetWidth();
             if (_currentPreferredHeight != _tmProUGUI.preferredHeight) SetHeight();
 
-            LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
-
-            if (_belongsToALayoutGroup)
-                LayoutGroupRefreshProblemSolver.RefreshLayoutGroupsImmediateAndRecursive(gameObject)
-            ;
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
         }
     }
 
