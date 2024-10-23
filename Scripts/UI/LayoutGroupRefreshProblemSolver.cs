@@ -11,21 +11,9 @@ https://forum.unity.com/threads/layoutgroup-does-not-refresh-in-its-current-fram
 */
 public static class LayoutGroupRefreshProblemSolver
 {
-    private static LayoutGroup FindRootLayoutGroup(GameObject alteredGameObject)
+    public static void RefreshLayoutGroupsImmediateAndRecursive(LayoutGroup alteredLayoutGroup)
     {
-        LayoutGroup[] parentLayoutGroups = alteredGameObject.GetComponentsInParent<LayoutGroup>();
-        return parentLayoutGroups[^1];
-    }
-
-    public static void RefreshLayoutGroupsImmediateAndRecursive(GameObject alteredGameObject)
-    {
-        if (!alteredGameObject.GetComponentInParent<LayoutGroup>())
-        {
-            Debug.LogWarning(alteredGameObject + " does not belong to any LayoutGroup. Returning method.");
-            return;
-        }
-
-        LayoutGroup rootLayoutGroup = FindRootLayoutGroup(alteredGameObject);
+        LayoutGroup rootLayoutGroup = FindRootLayoutGroup(alteredLayoutGroup);
 
         LayoutGroup[] layoutGroupsInRootChildren = rootLayoutGroup.GetComponentsInChildren<LayoutGroup>();
 
@@ -35,6 +23,12 @@ public static class LayoutGroupRefreshProblemSolver
             LayoutRebuilder.ForceRebuildLayoutImmediate(layoutGroup.GetComponent<RectTransform>());
         }
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(rootLayoutGroup.GetComponent<RectTransform>());
+        static LayoutGroup FindRootLayoutGroup(LayoutGroup alteredLayoutGroup)
+        {
+            LayoutGroup[] parentLayoutGroups = 
+                alteredLayoutGroup.gameObject.GetComponentsInParent<LayoutGroup>()
+            ;
+            return parentLayoutGroups[^1];
+        }
     }
 }
