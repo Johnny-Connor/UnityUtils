@@ -652,6 +652,8 @@ namespace UnityEngine.UI
         {
             Selectable[] searchList = AllSelectablesInHierarchy;
 
+            if (searchList == null || searchList.Length == 0) return;
+
             if (searchList.Length == 1)
             {
                 EventSystem.current.SetSelectedGameObject(searchList[0].gameObject);
