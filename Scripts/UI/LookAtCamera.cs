@@ -1,6 +1,9 @@
 using UnityEngine;
 
-// Useful for canvases that use the 'World Space' render mode.
+/// <summary>
+/// Rotates an object to always face the <see cref="Camera.main"/>. Useful for UI elements in a 
+/// <see cref="Canvas"/> using <see cref="RenderMode.WorldSpace"/>.
+/// </summary>
 public class LookAtCamera : MonoBehaviour
 {
     // Variables.

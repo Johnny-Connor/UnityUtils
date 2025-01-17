@@ -3,12 +3,17 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-/*
-Note 1: CursorLockMode is not being used because it currently performs very poorly.
-Note 2: For consistent testing in the editor, click inside the 'Game' window after starting the game to
-ensure most Unity's cursor control methods work as intended.
-*/
-public class CursorController : MonoBehaviour
+/// <summary>
+/// Controls cursor visibility based on the current input device.
+/// <para>
+/// Note 1: <see cref="CursorLockMode"\n> is not being used because it currently performs very poorly.
+/// </para>
+/// <para>
+/// Note 2: For consistent testing in the editor, ensure the 'Game' window is focused after starting the
+/// game to allow Unity's cursor control methods to work as intended.
+/// </para>
+/// </summary>
+public class CursorVisibilityController : MonoBehaviour
 {
     // Variables.
     [Tooltip("These components found in canvases will be disabled when the cursor is made invisible " +

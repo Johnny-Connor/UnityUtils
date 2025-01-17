@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// A scene loader based on CodeMonkey's Loader.cs from his Kitchen Chaos Game Course.
+/// <summary>
+/// A scene loader based on CodeMonkey's Loader.cs from his Kitchen Chaos Game Course.
+/// </summary>
 public static class SceneLoader
 {
     // Variables.

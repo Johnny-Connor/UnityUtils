@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Allows control over the game's frame rate via the inspector.
+/// </summary>
 public class TargetFrameRateController : MonoBehaviour
 {
     // Variables.

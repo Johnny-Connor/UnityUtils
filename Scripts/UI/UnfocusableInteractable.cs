@@ -3,11 +3,14 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-/*
-An interactable that does not take the focus from a selected Selectable upon interaction.
-Note: If the GameObject containing this script has any other script with the ISelectHandler interface in 
-it, the EventSystem will clear the selection whenever this interactable is clicked.
-*/
+/// <summary>
+/// An interactable that does not take focus from the current selection when interacted with.
+/// <para>
+/// Note: If the <see cref="GameObject"/> containing this has any other script implementing 
+/// <see cref="ISelectHandler"/>, the <see cref="EventSystem"/> will clear the selection when this 
+/// interactable is clicked.
+/// </para>
+/// </summary>
 [ExecuteAlways]
 public class UnfocusableInteractable:
     UIBehaviour,

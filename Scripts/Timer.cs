@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// Supports callback, cycle override control, and remaining time tracking.
+/// </summary>
 public class Timer
 {
     // Variables.

@@ -1,11 +1,11 @@
 using System;
 using UnityEngine;
 
-/*
-A class that uses Mathf.Lerp the way it was intended to be used, guaranteeing a value transition over a
-given time without slowing down exponentialy as it approaches the end, as often seen in many
-implementations.
-*/
+/// <summary>
+/// Utilizes <see cref="Mathf.Lerp"/> as intended, ensuring smooth value transitions over a specified 
+/// duration without the exponential slow-down near the end seen in many implementations. Supports 
+/// callback and cycle override control.
+/// </summary>
 public class Lerper
 {
     // Variables.

@@ -1,9 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Automatically adjusts the size of a <see cref="TMPro.TextMeshProUGUI"/> component to match its text 
+/// content at runtime. Does not work with 'stretch' anchors.
+/// </summary>
 [RequireComponent(typeof(RectTransform))]
 [RequireComponent(typeof(TMPro.TextMeshProUGUI))]
-// Auto-updates TextMeshProUGUI's size as it changes during runtime. Does not work with 'stretch' anchors.
 public class TextMeshProUGUIAutoSizer : MonoBehaviour
 {
     // Variables.
